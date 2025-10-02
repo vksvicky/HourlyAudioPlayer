@@ -76,17 +76,19 @@ class HourlyTimer: ObservableObject {
         if let audioFile = audioFileManager.getAudioFile(for: currentHour) {
             logger.info("✅ Found audio file: \(audioFile.name) at \(audioFile.url)")
             audioManager.playAudio(from: audioFile)
+            sendNotification(for: currentHour, audioFile: audioFile)
         } else {
             logger.info("❌ No audio file set for current hour \(currentHour)")
             logger.info("🔔 Playing default macOS system sound instead")
             playSystemSound()
+            sendNotification(for: currentHour, audioFile: nil)
             logger.info("📋 Available audio files:")
             for (hour, audioFile) in audioFileManager.audioFiles {
                 logger.info("   Hour \(hour): \(audioFile.name)")
             }
         }
     }
-    
+
     private func playSystemSound() {
         // Play the default macOS system sound
         NSSound.beep()
@@ -103,13 +105,13 @@ class HourlyTimer: ObservableObject {
     private func sendNotification(for hour: Int, audioFile: AudioFile?) {
         let content = UNMutableNotificationContent()
         content.title = "Hourly Audio Player"
-        
+
         if let audioFile = audioFile {
             content.body = "Playing audio for \(hour):00 - \(audioFile.name)"
         } else {
             content.body = "Playing system sound for \(hour):00 (no custom audio set)"
         }
-        
+
         content.sound = nil // We're playing our own audio
 
         let request = UNNotificationRequest(
@@ -148,4 +150,25 @@ class HourlyTimer: ObservableObject {
 
         return nil
     }
+
+    #if DEBUG_MODE
+    func testNotificationWithAudio() {
+        let currentHour = Calendar.current.component(.hour, from: Date())
+        logger.info("🐛 DEBUG: Testing notification with audio for hour \(currentHour)")
+
+        if let audioFile = audioFileManager.getAudioFile(for: currentHour) {
+            logger.info(
+                "🐛 DEBUG: Found audio file: \(audioFile.name) - playing audio and sending notification"
+            )
+            audioManager.playAudio(from: audioFile)
+            sendNotification(for: currentHour, audioFile: audioFile)
+        } else {
+            logger.info(
+                "🐛 DEBUG: No audio file set for hour \(currentHour) - playing system sound and sending notification"
+            )
+            playSystemSound()
+            sendNotification(for: currentHour, audioFile: nil)
+        }
+    }
+    #endif
 }

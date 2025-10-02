@@ -9,9 +9,10 @@ struct MenuBarView: View {
     var body: some View {
         VStack(spacing: 16) {
             HStack {
-                Image(systemName: "speaker.wave.2")
-                    .font(.title2)
-                    .foregroundColor(.blue)
+                Image(nsImage: NSApp.applicationIconImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 24, height: 24)
 
                 Text("Hourly Audio Player")
                     .font(.headline)
@@ -110,12 +111,9 @@ struct MenuBarView: View {
     private var nextAudioString: String {
         let currentHour = Calendar.current.component(.hour, from: Date())
         let nextHour = (currentHour + 1) % 24
-
-        if let audioFile = audioFileManager.audioFiles[nextHour] {
-            return "\(nextHour):00 - \(audioFile.name)"
-        } else {
-            return "\(nextHour):00 - No audio set"
-        }
+        
+        let displayName = audioFileManager.getAudioDisplayName(for: nextHour)
+        return "\(nextHour):00 - \(displayName)"
     }
 }
 

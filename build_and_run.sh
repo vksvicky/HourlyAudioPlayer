@@ -1,27 +1,31 @@
 #!/bin/bash
 
 # Script to build and run the Hourly Audio Player app in development mode
-# Usage: ./build_and_run.sh [major|minor]
+# Usage: ./build_and_run.sh [major|minor] [debug]
 #   major: Updates CFBundleShortVersionString & NSApplicationVersion (e.g., 1.0.0 -> 2.0.0)
 #   minor: Updates CFBundleVersion & NSVersion Build number (e.g., Build 46 -> Build 47)
+#   debug: Enables debug mode with notification testing features
 #   Default: minor
 
 set -e  # Exit on any error
 
 # Parse command line arguments
 UPDATE_TYPE=${1:-minor}
+DEBUG_MODE=${2:-false}
 
 if [[ "$UPDATE_TYPE" != "major" && "$UPDATE_TYPE" != "minor" ]]; then
     echo "❌ Invalid update type. Use 'major' or 'minor'"
-    echo "Usage: $0 [major|minor]"
+    echo "Usage: $0 [major|minor] [debug]"
     echo "  major: Updates version number (1.0.0 -> 2.0.0)"
     echo "  minor: Updates build number (Build 46 -> Build 47)"
+    echo "  debug: Enables debug mode with notification testing features"
     exit 1
 fi
 
 echo "🚀 Building and running Hourly Audio Player..."
 echo "=============================================="
 echo "📋 Update type: $UPDATE_TYPE"
+echo "🐛 Debug mode: $DEBUG_MODE"
 
 # Colors for output
 RED='\033[0;31m'
@@ -130,11 +134,21 @@ xcodebuild clean -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer 
 
 # Build the project
 print_status "Building Hourly Audio Player..."
-if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Debug build; then
-    print_success "Build completed successfully!"
+if [ "$DEBUG_MODE" = "debug" ]; then
+    print_status "Building with debug mode enabled..."
+    if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Debug build GCC_PREPROCESSOR_DEFINITIONS="DEBUG_MODE=1"; then
+        print_success "Build completed successfully with debug mode!"
+    else
+        print_error "Build failed!"
+        exit 1
+    fi
 else
-    print_error "Build failed!"
-    exit 1
+    if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Debug build; then
+        print_success "Build completed successfully!"
+    else
+        print_error "Build failed!"
+        exit 1
+    fi
 fi
 
 # Find the built app
@@ -163,6 +177,9 @@ echo "   • Look for the speaker icon in your menu bar"
 echo "   • Click the icon to open the app interface"
 echo "   • Use 'Open Settings' to configure audio files"
 echo "   • The app will automatically play audio at the top of each hour"
+if [ "$DEBUG_MODE" = "debug" ]; then
+    echo "   • 🐛 DEBUG MODE: Test notification button available in settings"
+fi
 echo ""
 echo "🔧 To stop the app:"
 echo "   • Click the menu bar icon → Quit"

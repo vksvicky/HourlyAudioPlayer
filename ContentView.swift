@@ -43,12 +43,15 @@ struct ContentView: View {
             Divider()
 
             HStack {
-                Button("Import Audio Files") {
-                    audioFileManager.importAudioFiles()
-                }
-                .buttonStyle(.borderedProminent)
-
                 Spacer()
+
+                #if DEBUG_MODE
+                Button("🐛 Test Notification") {
+                    hourlyTimer.testNotificationWithAudio()
+                }
+                .buttonStyle(.bordered)
+                .foregroundColor(.orange)
+                #endif
 
                 Button("Test Current Hour") {
                     hourlyTimer.playCurrentHourAudio()
@@ -77,25 +80,29 @@ struct HourSlotView: View {
                 .font(.headline)
                 .fontWeight(.semibold)
 
-            if let audioFile = audioFileManager.audioFiles[hour] {
-                VStack(spacing: 4) {
-                    Text(audioFile.name)
-                        .font(.caption)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.center)
+            let displayName = audioFileManager.getAudioDisplayName(for: hour)
+            let hasSpecificAudio = audioFileManager.audioFiles[hour] != nil
+            
+            VStack(spacing: 4) {
+                Text(displayName)
+                    .font(.caption)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+                    .foregroundColor(hasSpecificAudio ? .primary : .secondary)
 
+                if hasSpecificAudio {
                     Button("Remove") {
                         audioFileManager.removeAudioFile(for: hour)
                     }
                     .font(.caption2)
                     .foregroundColor(.red)
+                } else {
+                    Button("Add Audio") {
+                        audioFileManager.selectAudioFile(for: hour)
+                    }
+                    .font(.caption)
+                    .foregroundColor(.blue)
                 }
-            } else {
-                Button("Add Audio") {
-                    audioFileManager.selectAudioFile(for: hour)
-                }
-                .font(.caption)
-                .foregroundColor(.blue)
             }
         }
         .frame(width: 100, height: 80)
