@@ -5,6 +5,8 @@ struct MenuBarView: View {
     @StateObject private var hourlyTimer = HourlyTimer.shared
     @State private var showingSettings = false
     @State private var showingAbout = false
+    @State private var currentTime = Date()
+    @State private var timeUpdateTimer: Timer?
 
     var body: some View {
         VStack(spacing: 16) {
@@ -19,10 +21,10 @@ struct MenuBarView: View {
                     .fontWeight(.semibold)
 
                 Spacer()
-                
+
                 Button(action: {
                     // Close the popover by sending a close action
-                    NSApp.sendAction(Selector(("performClose:")), to: nil, from: nil)
+                    NSApp.sendAction(#selector(NSPopover.performClose(_:)), to: nil, from: nil)
                 }, label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.title2)
@@ -100,18 +102,35 @@ struct MenuBarView: View {
         .sheet(isPresented: $showingAbout) {
             AboutWindow()
         }
+        .onAppear {
+            startTimeUpdateTimer()
+        }
+        .onDisappear {
+            stopTimeUpdateTimer()
+        }
+    }
+
+    private func startTimeUpdateTimer() {
+        timeUpdateTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            currentTime = Date()
+        }
+    }
+
+    private func stopTimeUpdateTimer() {
+        timeUpdateTimer?.invalidate()
+        timeUpdateTimer = nil
     }
 
     private var currentTimeString: String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
-        return formatter.string(from: Date())
+        return formatter.string(from: currentTime)
     }
 
     private var nextAudioString: String {
-        let currentHour = Calendar.current.component(.hour, from: Date())
+        let currentHour = Calendar.current.component(.hour, from: currentTime)
         let nextHour = (currentHour + 1) % 24
-        
+
         let displayName = audioFileManager.getAudioDisplayName(for: nextHour)
         return "\(nextHour):00 - \(displayName)"
     }

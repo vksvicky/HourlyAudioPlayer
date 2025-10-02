@@ -60,7 +60,7 @@ fi
 # Version update functionality
 update_version() {
     local update_type=$1
-    local info_plist="Info.plist"
+    local info_plist="src/Info.plist"
     
     if [ ! -f "$info_plist" ]; then
         print_error "Info.plist not found!"
@@ -187,13 +187,13 @@ echo "   • Or run: pkill -f HourlyAudioPlayer"
 echo ""
 echo "📊 Version Information:"
 if [ "$UPDATE_TYPE" = "major" ]; then
-    current_version=$(plutil -extract CFBundleShortVersionString raw "Info.plist")
-    current_build=$(plutil -extract CFBundleVersion raw "Info.plist")
+    current_version=$(plutil -extract CFBundleShortVersionString raw "src/Info.plist")
+    current_build=$(plutil -extract CFBundleVersion raw "src/Info.plist")
     echo "   • Version: $current_version (Build $current_build)"
     echo "   • Major version was incremented"
 else
-    current_version=$(plutil -extract CFBundleShortVersionString raw "Info.plist")
-    current_build=$(plutil -extract CFBundleVersion raw "Info.plist")
+    current_version=$(plutil -extract CFBundleShortVersionString raw "src/Info.plist")
+    current_build=$(plutil -extract CFBundleVersion raw "src/Info.plist")
     echo "   • Version: $current_version (Build $current_build)"
     echo "   • Build number was incremented"
 fi

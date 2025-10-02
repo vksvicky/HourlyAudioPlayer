@@ -17,8 +17,14 @@ class AudioManager: ObservableObject {
         // AVAudioPlayer handles audio routing automatically
     }
 
-    func playAudio(from url: URL) {
+    func playAudio(from url: URL) -> Bool {
         do {
+            // Check if file exists first
+            guard FileManager.default.fileExists(atPath: url.path) else {
+                logger.warning("Audio file does not exist: \(url.lastPathComponent)")
+                return false
+            }
+            
             // Stop any currently playing audio
             stopAudio()
 
@@ -28,14 +34,16 @@ class AudioManager: ObservableObject {
             audioPlayer?.play()
 
             logger.info("Playing audio: \(url.lastPathComponent)")
+            return true
 
         } catch {
             logger.error("Error playing audio: \(error.localizedDescription)")
+            return false
         }
     }
 
-    func playAudio(from audioFile: AudioFile) {
-        playAudio(from: audioFile.url)
+    func playAudio(from audioFile: AudioFile) -> Bool {
+        return playAudio(from: audioFile.url)
     }
 
     func stopAudio() {

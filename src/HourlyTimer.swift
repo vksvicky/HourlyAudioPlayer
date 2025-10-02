@@ -60,8 +60,14 @@ class HourlyTimer: ObservableObject {
         lastPlayedHour = currentHour
 
         if let audioFile = audioFileManager.getAudioFile(for: currentHour) {
-            audioManager.playAudio(from: audioFile)
-            sendNotification(for: currentHour, audioFile: audioFile)
+            let success = audioManager.playAudio(from: audioFile)
+            if success {
+                sendNotification(for: currentHour, audioFile: audioFile)
+            } else {
+                logger.warning("Failed to play audio file: \(audioFile.name) - file may be missing or corrupted")
+                sendMissingFileNotification(for: currentHour, audioFile: audioFile)
+                playSystemSound()
+            }
         } else {
             logger.info("No audio file set for hour \(currentHour) - playing system sound")
             playSystemSound()
@@ -75,8 +81,15 @@ class HourlyTimer: ObservableObject {
 
         if let audioFile = audioFileManager.getAudioFile(for: currentHour) {
             logger.info("✅ Found audio file: \(audioFile.name) at \(audioFile.url)")
-            audioManager.playAudio(from: audioFile)
-            sendNotification(for: currentHour, audioFile: audioFile)
+            let success = audioManager.playAudio(from: audioFile)
+            if success {
+                sendNotification(for: currentHour, audioFile: audioFile)
+            } else {
+                logger.warning("❌ Failed to play audio file: \(audioFile.name) - file may be missing or corrupted")
+                sendMissingFileNotification(for: currentHour, audioFile: audioFile)
+                logger.info("🔔 Playing default macOS system sound instead")
+                playSystemSound()
+            }
         } else {
             logger.info("❌ No audio file set for current hour \(currentHour)")
             logger.info("🔔 Playing default macOS system sound instead")
@@ -126,6 +139,29 @@ class HourlyTimer: ObservableObject {
             }
         }
     }
+    
+    private func sendMissingFileNotification(for hour: Int, audioFile: AudioFile) {
+        let content = UNMutableNotificationContent()
+        content.title = "⚠️ Audio File Missing"
+        content.body = "Could not play '\(audioFile.name)' for \(hour):00. File may be missing, moved, or corrupted. Playing system sound instead."
+        
+        // Use a warning sound for missing files
+        content.sound = UNNotificationSound.default
+
+        let request = UNNotificationRequest(
+            identifier: "missing-audio-\(hour)-\(Date().timeIntervalSince1970)",
+            content: content,
+            trigger: nil
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                self.logger.error("Missing file notification error: \(error.localizedDescription)")
+            } else {
+                self.logger.info("Sent missing file notification for: \(audioFile.name)")
+            }
+        }
+    }
 
     func getNextAudioTime() -> Date? {
         let now = Date()
@@ -160,8 +196,14 @@ class HourlyTimer: ObservableObject {
             logger.info(
                 "🐛 DEBUG: Found audio file: \(audioFile.name) - playing audio and sending notification"
             )
-            audioManager.playAudio(from: audioFile)
-            sendNotification(for: currentHour, audioFile: audioFile)
+            let success = audioManager.playAudio(from: audioFile)
+            if success {
+                sendNotification(for: currentHour, audioFile: audioFile)
+            } else {
+                logger.warning("🐛 DEBUG: Failed to play audio file: \(audioFile.name) - file may be missing or corrupted")
+                sendMissingFileNotification(for: currentHour, audioFile: audioFile)
+                playSystemSound()
+            }
         } else {
             logger.info(
                 "🐛 DEBUG: No audio file set for hour \(currentHour) - playing system sound and sending notification"
