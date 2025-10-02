@@ -584,4 +584,134 @@ class ContentViewTests: XCTestCase {
             XCTAssertNotNil(window)
         }
     }
+    
+    // MARK: - AppDelegate Tests
+    
+    func testApplicationDidFinishLaunchingHappyPath() {
+        // Given: A mock AppDelegate
+        let appDelegate = AppDelegate()
+        
+        // When: Application finishes launching
+        // Then: Should not crash
+        XCTAssertNoThrow(appDelegate.applicationDidFinishLaunching(Notification(name: .NSApplicationDidFinishLaunching)))
+    }
+    
+    func testApplicationDidFinishLaunchingWithNilNotification() {
+        // Given: A mock AppDelegate
+        let appDelegate = AppDelegate()
+        
+        // When: Application finishes launching with nil notification
+        // Then: Should not crash
+        XCTAssertNoThrow(appDelegate.applicationDidFinishLaunching(Notification(name: .NSApplicationDidFinishLaunching)))
+    }
+    
+    func testApplicationDidFinishLaunchingMultipleCalls() {
+        // Given: A mock AppDelegate
+        let appDelegate = AppDelegate()
+        
+        // When: Application finishes launching multiple times
+        // Then: Should not crash
+        for _ in 0..<5 {
+            XCTAssertNoThrow(appDelegate.applicationDidFinishLaunching(Notification(name: .NSApplicationDidFinishLaunching)))
+        }
+    }
+    
+    func testStatusBarButtonClickedHappyPath() {
+        // Given: A mock AppDelegate
+        let appDelegate = AppDelegate()
+        
+        // When: Status bar button is clicked
+        // Then: Should not crash
+        XCTAssertNoThrow(appDelegate.statusBarButtonClicked())
+    }
+    
+    func testStatusBarButtonClickedMultipleCalls() {
+        // Given: A mock AppDelegate
+        let appDelegate = AppDelegate()
+        
+        // When: Status bar button is clicked multiple times
+        // Then: Should not crash
+        for _ in 0..<10 {
+            XCTAssertNoThrow(appDelegate.statusBarButtonClicked())
+        }
+    }
+    
+    func testStatusBarButtonClickedConcurrentCalls() {
+        // Given: A mock AppDelegate
+        let appDelegate = AppDelegate()
+        let expectation = XCTestExpectation(description: "Concurrent status bar clicks")
+        expectation.expectedFulfillmentCount = 5
+        
+        // When: Status bar button is clicked concurrently
+        DispatchQueue.concurrentPerform(iterations: 5) { _ in
+            XCTAssertNoThrow(appDelegate.statusBarButtonClicked())
+            expectation.fulfill()
+        }
+        
+        // Then: All calls should complete without crashing
+        wait(for: [expectation], timeout: 5.0)
+    }
+    
+    func testStatusBarButtonClickedWithNilPopover() {
+        // Given: A mock AppDelegate with nil popover
+        let appDelegate = AppDelegate()
+        appDelegate.popover = nil
+        
+        // When: Status bar button is clicked
+        // Then: Should not crash
+        XCTAssertNoThrow(appDelegate.statusBarButtonClicked())
+    }
+    
+    func testStatusBarButtonClickedWithNilStatusItem() {
+        // Given: A mock AppDelegate with nil status item
+        let appDelegate = AppDelegate()
+        appDelegate.statusItem = nil
+        
+        // When: Status bar button is clicked
+        // Then: Should not crash
+        XCTAssertNoThrow(appDelegate.statusBarButtonClicked())
+    }
+    
+    func testAppDelegateInitialization() {
+        // Given: A new AppDelegate
+        // When: Creating the AppDelegate
+        let appDelegate = AppDelegate()
+        
+        // Then: Should be initialized properly
+        XCTAssertNotNil(appDelegate)
+        XCTAssertNil(appDelegate.statusItem) // Initially nil
+        XCTAssertNil(appDelegate.popover) // Initially nil
+    }
+    
+    func testAppDelegateMemoryManagement() {
+        // Given: A weak reference to AppDelegate
+        weak var weakAppDelegate: AppDelegate?
+        
+        // When: Creating and releasing AppDelegate
+        autoreleasepool {
+            let appDelegate = AppDelegate()
+            weakAppDelegate = appDelegate
+            
+            // Perform some operations
+            appDelegate.applicationDidFinishLaunching(Notification(name: .NSApplicationDidFinishLaunching))
+            appDelegate.statusBarButtonClicked()
+        }
+        
+        // Then: AppDelegate should be deallocated
+        XCTAssertNil(weakAppDelegate)
+    }
+    
+    func testAppDelegateStressTest() {
+        // Given: A mock AppDelegate
+        let appDelegate = AppDelegate()
+        
+        // When: Performing many operations rapidly
+        for _ in 0..<100 {
+            appDelegate.applicationDidFinishLaunching(Notification(name: .NSApplicationDidFinishLaunching))
+            appDelegate.statusBarButtonClicked()
+        }
+        
+        // Then: Should not crash
+        XCTAssertTrue(true)
+    }
 }

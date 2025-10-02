@@ -533,7 +533,7 @@ class AudioFileManagerTests: XCTestCase {
 
     func testShowValidationAlertHappyPath() {
         // Given: A validation error
-        let error = ValidationError.fileTooLarge
+        let error = ValidationError.fileTooLarge(size: 3.0)
         let fileName = "test_file.mp3"
         
         // When: Showing validation alert
@@ -544,9 +544,9 @@ class AudioFileManagerTests: XCTestCase {
     func testShowValidationAlertAllErrorTypes() {
         // Given: All possible validation errors
         let errors = [
-            ValidationError.fileTooLarge,
-            ValidationError.invalidFormat,
-            ValidationError.fileNotFound
+            ValidationError.fileTooLarge(size: 3.0),
+            ValidationError.unsupportedFormat(format: "xyz"),
+            ValidationError.fileAccessError
         ]
         let fileName = "test_file.mp3"
         
@@ -559,12 +559,147 @@ class AudioFileManagerTests: XCTestCase {
 
     func testShowValidationAlertEmptyFileName() {
         // Given: A validation error with empty filename
-        let error = ValidationError.fileTooLarge
+        let error = ValidationError.fileTooLarge(size: 2.0)
         let fileName = ""
         
         // When: Showing alert with empty filename
         // Then: Should not crash
         XCTAssertNoThrow(audioFileManager.showAlert(for: error, fileName: fileName))
+    }
+    
+    func testShowValidationAlertUnsupportedFormat() {
+        // Given: A validation error for unsupported format
+        let error = ValidationError.unsupportedFormat(format: "xyz")
+        let fileName = "weird_file.xyz"
+        
+        // When: Showing validation alert
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.showAlert(for: error, fileName: fileName))
+    }
+    
+    func testShowValidationAlertFileAccessError() {
+        // Given: A validation error for file access
+        let error = ValidationError.fileAccessError
+        let fileName = "inaccessible_file.mp3"
+        
+        // When: Showing validation alert
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.showAlert(for: error, fileName: fileName))
+    }
+    
+    func testShowValidationAlertSpecialCharactersInFileName() {
+        // Given: A validation error with special characters in filename
+        let error = ValidationError.fileTooLarge(size: 1.0)
+        let fileName = "file with spaces & symbols!@#.mp3"
+        
+        // When: Showing alert with special characters
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.showAlert(for: error, fileName: fileName))
+    }
+    
+    func testShowValidationAlertVeryLongFileName() {
+        // Given: A validation error with very long filename
+        let error = ValidationError.unsupportedFormat(format: "mp3")
+        let longFileName = String(repeating: "a", count: 255) + ".mp3"
+        
+        // When: Showing alert with long filename
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.showAlert(for: error, fileName: longFileName))
+    }
+    
+    func testShowValidationAlertConcurrentCalls() {
+        // Given: Multiple concurrent validation alerts
+        let expectation = XCTestExpectation(description: "Concurrent validation alerts")
+        expectation.expectedFulfillmentCount = 5
+        
+        // When: Showing multiple alerts concurrently
+        DispatchQueue.concurrentPerform(iterations: 5) { index in
+            let error = ValidationError.fileTooLarge(size: Double(index + 1))
+            let fileName = "concurrent_file_\(index).mp3"
+            
+            XCTAssertNoThrow(audioFileManager.showAlert(for: error, fileName: fileName))
+            expectation.fulfill()
+        }
+        
+        // Then: All alerts should complete without crashing
+        wait(for: [expectation], timeout: 5.0)
+    }
+    
+    // MARK: - Private showValidationAlert Tests (via importAudioFile)
+    
+    func testShowValidationAlertViaImportAudioFileLargeFile() {
+        // Given: A large file that will trigger validation error
+        let largeFileURL = tempDirectory.appendingPathComponent("large_file.mp3")
+        let largeData = Data(count: 3 * 1024 * 1024) // 3MB - exceeds 2.5MB limit
+        try! largeData.write(to: largeFileURL)
+        
+        // When: Importing the large file (this should trigger showValidationAlert)
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.importAudioFile(from: largeFileURL, for: 10))
+        
+        // Clean up
+        try? FileManager.default.removeItem(at: largeFileURL)
+    }
+    
+    func testShowValidationAlertViaImportAudioFileUnsupportedFormat() {
+        // Given: A file with unsupported format
+        let unsupportedFileURL = tempDirectory.appendingPathComponent("test.xyz")
+        let testData = "unsupported format".data(using: .utf8)!
+        try! testData.write(to: unsupportedFileURL)
+        
+        // When: Importing the unsupported file (this should trigger showValidationAlert)
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.importAudioFile(from: unsupportedFileURL, for: 15))
+        
+        // Clean up
+        try? FileManager.default.removeItem(at: unsupportedFileURL)
+    }
+    
+    func testShowValidationAlertViaImportAudioFileNonExistent() {
+        // Given: A non-existent file
+        let nonExistentFileURL = tempDirectory.appendingPathComponent("nonexistent.mp3")
+        
+        // When: Importing the non-existent file (this should trigger showValidationAlert)
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.importAudioFile(from: nonExistentFileURL, for: 20))
+    }
+    
+    func testShowValidationAlertViaImportAudioFileCorruptedFile() {
+        // Given: A corrupted file (empty file with .mp3 extension)
+        let corruptedFileURL = tempDirectory.appendingPathComponent("corrupted.mp3")
+        let emptyData = Data() // Empty data
+        try! emptyData.write(to: corruptedFileURL)
+        
+        // When: Importing the corrupted file (this should trigger showValidationAlert)
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.importAudioFile(from: corruptedFileURL, for: 5))
+        
+        // Clean up
+        try? FileManager.default.removeItem(at: corruptedFileURL)
+    }
+    
+    func testShowValidationAlertViaImportAudioFileMultipleValidationErrors() {
+        // Given: Multiple files with different validation errors
+        let testCases = [
+            ("large.mp3", Data(count: 3 * 1024 * 1024)), // Too large
+            ("test.xyz", "unsupported".data(using: .utf8)!), // Unsupported format
+            ("nonexistent.mp3", nil) // Non-existent
+        ]
+        
+        // When: Importing each problematic file
+        for (index, (fileName, data)) in testCases.enumerated() {
+            let fileURL = tempDirectory.appendingPathComponent(fileName)
+            
+            if let data = data {
+                try? data.write(to: fileURL)
+            }
+            
+            // Then: Should not crash (this triggers showValidationAlert)
+            XCTAssertNoThrow(audioFileManager.importAudioFile(from: fileURL, for: index))
+            
+            // Clean up
+            try? FileManager.default.removeItem(at: fileURL)
+        }
     }
 
     // MARK: - Boundary Condition Tests
