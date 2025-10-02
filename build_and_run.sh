@@ -1,12 +1,27 @@
 #!/bin/bash
 
 # Script to build and run the Hourly Audio Player app in development mode
-# Usage: ./build_and_run.sh
+# Usage: ./build_and_run.sh [major|minor]
+#   major: Updates CFBundleShortVersionString & NSApplicationVersion (e.g., 1.0.0 -> 2.0.0)
+#   minor: Updates CFBundleVersion & NSVersion Build number (e.g., Build 46 -> Build 47)
+#   Default: minor
 
 set -e  # Exit on any error
 
+# Parse command line arguments
+UPDATE_TYPE=${1:-minor}
+
+if [[ "$UPDATE_TYPE" != "major" && "$UPDATE_TYPE" != "minor" ]]; then
+    echo "❌ Invalid update type. Use 'major' or 'minor'"
+    echo "Usage: $0 [major|minor]"
+    echo "  major: Updates version number (1.0.0 -> 2.0.0)"
+    echo "  minor: Updates build number (Build 46 -> Build 47)"
+    exit 1
+fi
+
 echo "🚀 Building and running Hourly Audio Player..."
 echo "=============================================="
+echo "📋 Update type: $UPDATE_TYPE"
 
 # Colors for output
 RED='\033[0;31m'
@@ -37,6 +52,77 @@ if [ ! -f "HourlyAudioPlayer.xcodeproj/project.pbxproj" ]; then
     print_error "HourlyAudioPlayer.xcodeproj not found. Please run this script from the project root directory."
     exit 1
 fi
+
+# Version update functionality
+update_version() {
+    local update_type=$1
+    local info_plist="Info.plist"
+    
+    if [ ! -f "$info_plist" ]; then
+        print_error "Info.plist not found!"
+        exit 1
+    fi
+    
+    if [ "$update_type" = "major" ]; then
+        # Update major version (CFBundleShortVersionString & NSApplicationVersion)
+        print_status "Updating major version..."
+        
+        # Get current version
+        current_version=$(plutil -extract CFBundleShortVersionString raw "$info_plist")
+        echo "Current version: $current_version"
+        
+        # Parse version components
+        IFS='.' read -r major minor patch <<< "$current_version"
+        
+        # Increment major version
+        new_major=$((major + 1))
+        new_version="$new_major.0.0"
+        
+        # Update CFBundleShortVersionString
+        plutil -replace CFBundleShortVersionString -string "$new_version" "$info_plist"
+        
+        # Update NSApplicationVersion in NSAboutPanelOptions
+        plutil -replace NSAboutPanelOptions.NSApplicationVersion -string "$new_version" "$info_plist"
+        
+        # Update NSVersion to include new version with build number
+        current_build=$(plutil -extract CFBundleVersion raw "$info_plist")
+        new_ns_version="$new_version (Build $current_build)"
+        plutil -replace NSAboutPanelOptions.NSVersion -string "$new_ns_version" "$info_plist"
+        
+        # Update CFBundleGetInfoString
+        new_info_string="Hourly Audio Player v$new_version - A menu bar app that plays custom audio files at the top of each hour."
+        plutil -replace CFBundleGetInfoString -string "$new_info_string" "$info_plist"
+        
+        print_success "Major version updated: $current_version -> $new_version"
+        
+    elif [ "$update_type" = "minor" ]; then
+        # Update build number (CFBundleVersion & NSVersion Build)
+        print_status "Updating build number..."
+        
+        # Get current build number
+        current_build=$(plutil -extract CFBundleVersion raw "$info_plist")
+        echo "Current build: $current_build"
+        
+        # Increment build number
+        new_build=$((current_build + 1))
+        
+        # Update CFBundleVersion
+        plutil -replace CFBundleVersion -string "$new_build" "$info_plist"
+        
+        # Update NSVersion Build number
+        current_version=$(plutil -extract CFBundleShortVersionString raw "$info_plist")
+        new_ns_version="$current_version (Build $new_build)"
+        plutil -replace NSAboutPanelOptions.NSVersion -string "$new_ns_version" "$info_plist"
+        
+        # Update Xcode project CURRENT_PROJECT_VERSION
+        sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*/CURRENT_PROJECT_VERSION = $new_build/g" HourlyAudioPlayer.xcodeproj/project.pbxproj
+        
+        print_success "Build number updated: $current_build -> $new_build"
+    fi
+}
+
+# Update version based on type
+update_version "$UPDATE_TYPE"
 
 # Clean previous build
 print_status "Cleaning previous build..."
@@ -81,5 +167,18 @@ echo ""
 echo "🔧 To stop the app:"
 echo "   • Click the menu bar icon → Quit"
 echo "   • Or run: pkill -f HourlyAudioPlayer"
+echo ""
+echo "📊 Version Information:"
+if [ "$UPDATE_TYPE" = "major" ]; then
+    current_version=$(plutil -extract CFBundleShortVersionString raw "Info.plist")
+    current_build=$(plutil -extract CFBundleVersion raw "Info.plist")
+    echo "   • Version: $current_version (Build $current_build)"
+    echo "   • Major version was incremented"
+else
+    current_version=$(plutil -extract CFBundleShortVersionString raw "Info.plist")
+    current_build=$(plutil -extract CFBundleVersion raw "Info.plist")
+    echo "   • Version: $current_version (Build $current_build)"
+    echo "   • Build number was incremented"
+fi
 echo ""
 print_status "App launched successfully! Check your menu bar for the speaker icon."

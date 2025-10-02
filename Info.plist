@@ -6,6 +6,8 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleGetInfoString</key>
+	<string>Hourly Audio Player v1.0.0 - A menu bar app that plays custom audio files at the top of each hour.</string>
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
@@ -19,37 +21,35 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>47</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>$(MACOSX_DEPLOYMENT_TARGET)</string>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2025 CycleRunCode. All rights reserved.</string>
-	<key>CFBundleGetInfoString</key>
-	<string>Hourly Audio Player v1.0.0 - A menu bar app that plays custom audio files at the top of each hour.</string>
+	<key>LSUIElement</key>
+	<true/>
 	<key>NSAboutPanelOptions</key>
 	<dict>
-		<key>NSApplicationName</key>
-		<string>Hourly Audio Player</string>
-		<key>NSApplicationVersion</key>
-		<string>1.0.0</string>
-		<key>NSVersion</key>
-		<string>1.0.0 (Build 1)</string>
-		<key>NSHumanReadableCopyright</key>
-		<string>Copyright © 2025 CycleRunCode. All rights reserved.</string>
 		<key>NSApplicationDescription</key>
 		<string>A beautiful menu bar application that plays custom audio files at the top of each hour. Perfect for time management, meditation reminders, or any hourly audio notifications.</string>
-		<key>NSApplicationWebsite</key>
-		<string>https://cycleruncode.club</string>
+		<key>NSApplicationName</key>
+		<string>Hourly Audio Player</string>
 		<key>NSApplicationSupportEmail</key>
 		<string>support@cycleruncode.club</string>
 		<key>NSApplicationSupportURL</key>
 		<string>https://cycleruncode.club</string>
+		<key>NSApplicationVersion</key>
+		<string>1.0.0</string>
+		<key>NSApplicationWebsite</key>
+		<string>https://cycleruncode.club</string>
+		<key>NSHumanReadableCopyright</key>
+		<string>Copyright © 2025 CycleRunCode. All rights reserved.</string>
+		<key>NSVersion</key>
+		<string>1.0.0 (Build 47)</string>
 	</dict>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2025 CycleRunCode. All rights reserved.</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
-	<key>LSUIElement</key>
-	<true/>
 </dict>
 </plist>

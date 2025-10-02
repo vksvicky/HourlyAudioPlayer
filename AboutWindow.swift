@@ -3,6 +3,10 @@ import SwiftUI
 struct AboutWindow: View {
     @Environment(\.dismiss) private var dismiss
     
+    private var aboutPanelOptions: [String: Any] {
+        Bundle.main.object(forInfoDictionaryKey: "NSAboutPanelOptions") as? [String: Any] ?? [:]
+    }
+    
     var body: some View {
         VStack(spacing: 14) {
             // Close button in top-right corner
@@ -27,37 +31,36 @@ struct AboutWindow: View {
                 .shadow(radius: 2)
             
             // App Name
-            Text("Hourly Audio Player")
+            Text(Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "Hourly Audio Player")
                 .font(.system(size: 28, weight: .bold, design: .default))
                 .foregroundColor(.primary)
             
             // Version Information
-            Text("Version 1.0.0 (Build 1)")
+            Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "N/A") (Build \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "N/A"))")
                 .font(.system(size: 14, weight: .regular, design: .default))
                 .foregroundColor(.primary)
             
             // Copyright Information
-            VStack(spacing: 4) {
-                Text("Copyright © 2025 CycleRunCode.")
-                Text("All rights reserved.")
-            }
-            .font(.system(size: 12, weight: .regular, design: .default))
-            .foregroundColor(.secondary)
-            .multilineTextAlignment(.center)
+            Text(Bundle.main.object(forInfoDictionaryKey: "NSHumanReadableCopyright") as? String ?? "Copyright © 2025 CycleRunCode. All rights reserved.")
+                .font(.system(size: 12, weight: .regular, design: .default))
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
             
             // Contact Information
             VStack(spacing: 6) {
                 HStack(spacing: 4) {
                     Image(systemName: "globe")
                         .foregroundColor(.blue)
-                    Link("https://cycleruncode.club", destination: URL(string: "https://cycleruncode.club")!)
+                    Link(aboutPanelOptions["NSApplicationWebsite"] as? String ?? "https://cycleruncode.club", 
+                         destination: URL(string: aboutPanelOptions["NSApplicationWebsite"] as? String ?? "https://cycleruncode.club")!)
                         .foregroundColor(.blue)
                 }
                 
                 HStack(spacing: 4) {
                     Image(systemName: "envelope")
                         .foregroundColor(.blue)
-                    Link("support@cycleruncode.club", destination: URL(string: "mailto:support@cycleruncode.club")!)
+                    Link(aboutPanelOptions["NSApplicationSupportEmail"] as? String ?? "support@cycleruncode.club", 
+                         destination: URL(string: "mailto:\(aboutPanelOptions["NSApplicationSupportEmail"] as? String ?? "support@cycleruncode.club")")!)
                         .foregroundColor(.blue)
                 }
             }
