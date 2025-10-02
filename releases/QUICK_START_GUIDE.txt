@@ -1,0 +1,61 @@
+Hourly Audio Player - Quick Start Guide
+=======================================
+
+🚀 GETTING STARTED (5 minutes)
+
+1. INSTALLATION
+   • Double-click the DMG file
+   • Drag HourlyAudioPlayer.app to Applications
+   • Launch from Applications or Spotlight
+
+2. FIRST LAUNCH
+   • Look for speaker icon in menu bar (top-right)
+   • Click the icon to open the app
+   • Grant permissions when prompted
+
+3. ADD AUDIO FILES
+   • Click "Open Settings" in the app
+   • Click "Add Audio" for any hour (0-23)
+   • Select your audio file (MP3, WAV, M4A, etc.)
+   • Repeat for other hours as needed
+
+4. TEST PLAYBACK
+   • Click "Test Current Hour" to verify audio
+   • Check that sound plays correctly
+   • Adjust system volume if needed
+
+5. AUTOMATIC PLAYBACK
+   • App will play audio at the top of each hour
+   • You'll see notifications when audio plays
+   • No further action needed!
+
+🎵 AUDIO FILE TIPS
+==================
+• Supported formats: MP3, WAV, M4A, AIFF, AAC, FLAC, OGG
+• Maximum file size: 2.5MB per file
+• Smart naming: "12_midday.mp3" automatically assigns to 12:00
+• Use short, clear audio clips for best results
+
+⚡ QUICK TROUBLESHOOTING
+========================
+• No menu bar icon? Check System Preferences > Security & Privacy
+• No sound? Use "Test Current Hour" and check system volume
+• No notifications? Check System Preferences > Notifications & Focus
+• App crashes? Restart the app or reboot your Mac
+
+🔧 ADVANCED FEATURES
+====================
+• Debug mode: Run with debug flag for development
+• File validation: Automatic checking of file formats and sizes
+• Missing file detection: Falls back to system sounds
+• Real-time clock: Always shows current time
+• Persistent storage: Settings saved between app launches
+
+📞 NEED HELP?
+=============
+• Run the included troubleshoot.sh script for diagnostics
+• Check the included RELEASE_NOTES for detailed troubleshooting
+• Use the included QUICK_START_GUIDE for setup help
+• Include diagnostic report when contacting support
+
+Happy listening! 🎧

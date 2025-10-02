@@ -1,0 +1,59 @@
+Hourly Audio Player Release Checklist
+=====================================
+
+📋 PRE-RELEASE CHECKLIST
+========================
+□ All tests pass (./run_tests.sh)
+□ App builds successfully in Release mode
+□ No compiler warnings or errors
+□ All features tested manually
+□ Documentation updated
+□ Version number incremented
+□ Release notes reviewed
+
+🧪 TESTING CHECKLIST
+====================
+□ App launches without errors
+□ Menu bar icon appears
+□ Settings window opens
+□ Audio file selection works
+□ File validation works (size, format)
+□ Audio playback works
+□ Notifications appear
+□ Test Current Hour works
+□ App persists between launches
+□ Quit functionality works
+
+📦 DISTRIBUTION CHECKLIST
+=========================
+□ DMG file created successfully
+□ ZIP file created successfully
+□ Release notes included
+□ Troubleshooting script included
+□ Quick start guide included
+□ All files in releases/ directory
+□ File sizes reasonable (< 50MB total)
+□ No sensitive information in files
+
+🔍 FINAL VERIFICATION
+=====================
+□ Test installation from DMG
+□ Verify app works on clean system
+□ Check all permissions work
+□ Confirm audio playback
+□ Test notification delivery
+□ Verify menu bar functionality
+□ Check app termination
+□ Validate file cleanup
+
+📊 RELEASE METRICS
+==================
+Version: 1.0.0
+Build Date: 2025-10-02 21:57:58
+DMG Size: 
+ZIP Size: 
+Total Files: 4 (DMG, ZIP, Release Notes, Troubleshoot Script)
+
+✅ READY FOR DISTRIBUTION
+========================
+All checks completed successfully!
