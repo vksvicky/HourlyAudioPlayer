@@ -134,9 +134,9 @@ xcodebuild clean -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer 
 
 # Build the project
 print_status "Building Hourly Audio Player..."
-if [ "$DEBUG_MODE" = "debug" ]; then
-    print_status "Building with debug mode enabled..."
-    if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Debug build GCC_PREPROCESSOR_DEFINITIONS="DEBUG_MODE=1"; then
+    if [ "$DEBUG_MODE" = "debug" ]; then
+        print_status "Building with debug mode enabled..."
+        if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Debug build SWIFT_ACTIVE_COMPILATION_CONDITIONS="DEBUG_MODE"; then
         print_success "Build completed successfully with debug mode!"
     else
         print_error "Build failed!"

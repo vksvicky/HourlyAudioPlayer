@@ -1,4 +1,5 @@
 import SwiftUI
+import os.log
 
 @main
 struct HourlyAudioPlayerApp: App {
@@ -14,6 +15,7 @@ struct HourlyAudioPlayerApp: App {
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem?
     var popover: NSPopover?
+    private let logger = Logger(subsystem: "com.example.HourlyAudioPlayer", category: "AppDelegate")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Hide the dock icon
@@ -41,14 +43,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func statusBarButtonClicked() {
+        logger.debug("statusBarButtonClicked() invoked")
         if let popover = popover {
+            logger.debug("Popover exists; isShown=\(popover.isShown, privacy: .public)")
             if popover.isShown {
+                logger.debug("Closing popover")
                 popover.performClose(nil)
             } else {
+                logger.debug("Opening popover")
                 if let statusButton = statusItem?.button {
                     popover.show(relativeTo: statusButton.bounds, of: statusButton, preferredEdge: NSRectEdge.minY)
+                } else {
+                    logger.error("Status bar button missing; cannot show popover")
                 }
             }
+        } else {
+            logger.error("Popover reference is nil")
         }
     }
 }

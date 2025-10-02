@@ -53,10 +53,12 @@ struct ContentView: View {
                 .foregroundColor(.orange)
                 #endif
 
+                #if DEBUG_MODE
                 Button("Test Current Hour") {
                     hourlyTimer.playCurrentHourAudio()
                 }
                 .buttonStyle(.bordered)
+                #endif
 
                 Button("Done") {
                     dismiss()

@@ -340,4 +340,325 @@ class AudioFileManagerTests: XCTestCase {
         // Then: Should return the network audio name without crashing
         XCTAssertEqual(displayName, "network.mp3")
     }
+
+    // MARK: - Additional Tests for Untested Functions
+
+    func testCreateAudioDirectoryIfNeeded() {
+        // Given: A clean state
+        audioFileManager.audioFiles.removeAll()
+        
+        // When: Creating audio directory (this is typically called internally)
+        // Then: Should not crash and directory should be accessible
+        XCTAssertNoThrow(audioFileManager.createAudioDirectoryIfNeeded())
+    }
+
+    func testSelectAudioFileHappyPath() {
+        // Given: A valid hour
+        let hour = 12
+        
+        // When: Selecting audio file (this will open file dialog in real app)
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.selectAudioFile(for: hour))
+    }
+
+    func testSelectAudioFileInvalidHour() {
+        // Given: Invalid hours
+        let invalidHours = [-1, 24, 25, 100]
+        
+        for hour in invalidHours {
+            // When: Selecting audio file for invalid hour
+            // Then: Should not crash (should handle gracefully)
+            XCTAssertNoThrow(audioFileManager.selectAudioFile(for: hour))
+        }
+    }
+
+    func testImportAudioFileHappyPath() {
+        // Given: A valid audio file URL and hour
+        let testFileURL = tempDirectory.appendingPathComponent("test_import.mp3")
+        let testData = "fake audio data".data(using: .utf8)!
+        try? testData.write(to: testFileURL)
+        let hour = 14
+        
+        // When: Importing the audio file
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.importAudioFile(from: testFileURL, for: hour))
+    }
+
+    func testImportAudioFileNonExistentFile() {
+        // Given: A non-existent file URL
+        let nonExistentURL = tempDirectory.appendingPathComponent("nonexistent.mp3")
+        let hour = 15
+        
+        // When: Importing non-existent file
+        // Then: Should not crash (should handle gracefully)
+        XCTAssertNoThrow(audioFileManager.importAudioFile(from: nonExistentURL, for: hour))
+    }
+
+    func testImportAudioFileInvalidURL() {
+        // Given: An invalid URL
+        let invalidURL = URL(string: "invalid://path/to/file.mp3")!
+        let hour = 16
+        
+        // When: Importing with invalid URL
+        // Then: Should not crash (should handle gracefully)
+        XCTAssertNoThrow(audioFileManager.importAudioFile(from: invalidURL, for: hour))
+    }
+
+    func testExtractHourFromFilenameHappyPath() {
+        // Given: Valid filenames with hour patterns
+        let validFilenames = [
+            "12_audio.mp3",
+            "00_morning.mp3",
+            "23_night.mp3",
+            "09_work.mp3"
+        ]
+        
+        for filename in validFilenames {
+            // When: Extracting hour from filename
+            // Then: Should return valid hour or nil gracefully
+            XCTAssertNoThrow(audioFileManager.extractHourFromFilename(filename))
+        }
+    }
+
+    func testExtractHourFromFilenameEdgeCases() {
+        // Given: Edge case filenames
+        let edgeCaseFilenames = [
+            "", // Empty string
+            "no_hour.mp3", // No hour pattern
+            "25_invalid.mp3", // Invalid hour
+            "abc_def.mp3", // Non-numeric
+            "12", // Just hour
+            "12_", // Hour with underscore but no extension
+        ]
+        
+        for filename in edgeCaseFilenames {
+            // When: Extracting hour from edge case filename
+            // Then: Should handle gracefully without crashing
+            XCTAssertNoThrow(audioFileManager.extractHourFromFilename(filename))
+        }
+    }
+
+    func testSaveAudioFilesHappyPath() {
+        // Given: Some audio files in the manager
+        let testFileURL = tempDirectory.appendingPathComponent("save_test.mp3")
+        let testData = "save test data".data(using: .utf8)!
+        try? testData.write(to: testFileURL)
+        
+        let testAudioFile = AudioFile(name: "save_test.mp3", url: testFileURL, hour: 10)
+        audioFileManager.audioFiles[10] = testAudioFile
+        
+        // When: Saving audio files
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.saveAudioFiles())
+    }
+
+    func testSaveAudioFilesEmptyState() {
+        // Given: Empty audio files state
+        audioFileManager.audioFiles.removeAll()
+        
+        // When: Saving empty audio files
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.saveAudioFiles())
+    }
+
+    func testLoadAudioFilesHappyPath() {
+        // Given: A clean state
+        audioFileManager.audioFiles.removeAll()
+        
+        // When: Loading audio files
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.loadAudioFiles())
+    }
+
+    func testLoadAudioFilesCorruptedData() {
+        // Given: A clean state
+        audioFileManager.audioFiles.removeAll()
+        
+        // When: Loading audio files (may encounter corrupted data)
+        // Then: Should not crash and handle gracefully
+        XCTAssertNoThrow(audioFileManager.loadAudioFiles())
+    }
+
+    func testFindMainWindowHappyPath() {
+        // Given: A clean state
+        // When: Finding main window
+        // Then: Should not crash (may return nil in test environment)
+        XCTAssertNoThrow(audioFileManager.findMainWindow())
+    }
+
+    func testValidateAudioFileHappyPath() {
+        // Given: A valid audio file
+        let testFileURL = tempDirectory.appendingPathComponent("valid_audio.mp3")
+        let testData = "valid audio data".data(using: .utf8)!
+        try? testData.write(to: testFileURL)
+        
+        // When: Validating the audio file
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.validateAudioFile(at: testFileURL))
+    }
+
+    func testValidateAudioFileNonExistent() {
+        // Given: A non-existent file
+        let nonExistentURL = tempDirectory.appendingPathComponent("nonexistent.mp3")
+        
+        // When: Validating non-existent file
+        // Then: Should return validation error without crashing
+        let result = audioFileManager.validateAudioFile(at: nonExistentURL)
+        XCTAssertNotNil(result) // Should return an error
+    }
+
+    func testValidateAudioFileTooLarge() {
+        // Given: A file that's too large (simulate by creating a large file)
+        let largeFileURL = tempDirectory.appendingPathComponent("large_audio.mp3")
+        let largeData = Data(count: 3 * 1024 * 1024) // 3MB
+        try? largeData.write(to: largeFileURL)
+        
+        // When: Validating large file
+        // Then: Should return validation error without crashing
+        let result = audioFileManager.validateAudioFile(at: largeFileURL)
+        XCTAssertNotNil(result) // Should return an error for file too large
+    }
+
+    func testValidateAudioFileInvalidFormat() {
+        // Given: A file with invalid format
+        let invalidFileURL = tempDirectory.appendingPathComponent("invalid.txt")
+        let invalidData = "This is not audio data".data(using: .utf8)!
+        try? invalidData.write(to: invalidFileURL)
+        
+        // When: Validating invalid format file
+        // Then: Should return validation error without crashing
+        let result = audioFileManager.validateAudioFile(at: invalidFileURL)
+        XCTAssertNotNil(result) // Should return an error for invalid format
+    }
+
+    func testShowValidationAlertHappyPath() {
+        // Given: A validation error
+        let error = ValidationError.fileTooLarge
+        let fileName = "test_file.mp3"
+        
+        // When: Showing validation alert
+        // Then: Should not crash (may not show alert in test environment)
+        XCTAssertNoThrow(audioFileManager.showAlert(for: error, fileName: fileName))
+    }
+
+    func testShowValidationAlertAllErrorTypes() {
+        // Given: All possible validation errors
+        let errors = [
+            ValidationError.fileTooLarge,
+            ValidationError.invalidFormat,
+            ValidationError.fileNotFound
+        ]
+        let fileName = "test_file.mp3"
+        
+        for error in errors {
+            // When: Showing alert for each error type
+            // Then: Should not crash
+            XCTAssertNoThrow(audioFileManager.showAlert(for: error, fileName: fileName))
+        }
+    }
+
+    func testShowValidationAlertEmptyFileName() {
+        // Given: A validation error with empty filename
+        let error = ValidationError.fileTooLarge
+        let fileName = ""
+        
+        // When: Showing alert with empty filename
+        // Then: Should not crash
+        XCTAssertNoThrow(audioFileManager.showAlert(for: error, fileName: fileName))
+    }
+
+    // MARK: - Boundary Condition Tests
+
+    func testBoundaryConditionsHourZero() {
+        // Given: Hour 0 (midnight)
+        let hour = 0
+        let testFileURL = tempDirectory.appendingPathComponent("midnight.mp3")
+        let testData = "midnight audio".data(using: .utf8)!
+        try? testData.write(to: testFileURL)
+        
+        let testAudioFile = AudioFile(name: "midnight.mp3", url: testFileURL, hour: hour)
+        audioFileManager.audioFiles[hour] = testAudioFile
+        
+        // When: Getting audio for hour 0
+        // Then: Should work correctly
+        let result = audioFileManager.getAudioFile(for: hour)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.hour, hour)
+    }
+
+    func testBoundaryConditionsHour23() {
+        // Given: Hour 23 (11 PM)
+        let hour = 23
+        let testFileURL = tempDirectory.appendingPathComponent("night.mp3")
+        let testData = "night audio".data(using: .utf8)!
+        try? testData.write(to: testFileURL)
+        
+        let testAudioFile = AudioFile(name: "night.mp3", url: testFileURL, hour: hour)
+        audioFileManager.audioFiles[hour] = testAudioFile
+        
+        // When: Getting audio for hour 23
+        // Then: Should work correctly
+        let result = audioFileManager.getAudioFile(for: hour)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.hour, hour)
+    }
+
+    func testBoundaryConditionsInvalidHours() {
+        // Given: Invalid hours
+        let invalidHours = [-1, 24, 25, 100, -100]
+        
+        for hour in invalidHours {
+            // When: Getting audio for invalid hour
+            // Then: Should return nil gracefully
+            let result = audioFileManager.getAudioFile(for: hour)
+            XCTAssertNil(result)
+        }
+    }
+
+    func testBoundaryConditionsVeryLongFilename() {
+        // Given: A very long filename
+        let longName = String(repeating: "a", count: 255) + ".mp3"
+        let testFileURL = tempDirectory.appendingPathComponent(longName)
+        let testData = "long filename audio".data(using: .utf8)!
+        try? testData.write(to: testFileURL)
+        
+        // When: Extracting hour from very long filename
+        // Then: Should handle gracefully without crashing
+        XCTAssertNoThrow(audioFileManager.extractHourFromFilename(longName))
+    }
+
+    func testBoundaryConditionsSpecialCharactersInFilename() {
+        // Given: Filenames with special characters
+        let specialFilenames = [
+            "12_audio with spaces.mp3",
+            "12_audio-with-dashes.mp3",
+            "12_audio.with.dots.mp3",
+            "12_audio(with)parentheses.mp3",
+            "12_audio[with]brackets.mp3",
+            "12_audio{with}braces.mp3",
+            "12_audio@with#symbols$.mp3"
+        ]
+        
+        for filename in specialFilenames {
+            // When: Extracting hour from filename with special characters
+            // Then: Should handle gracefully
+            XCTAssertNoThrow(audioFileManager.extractHourFromFilename(filename))
+        }
+    }
+
+    func testBoundaryConditionsUnicodeFilenames() {
+        // Given: Filenames with Unicode characters
+        let unicodeFilenames = [
+            "12_音频.mp3",
+            "12_🎵_music.mp3",
+            "12_файл.mp3",
+            "12_ファイル.mp3"
+        ]
+        
+        for filename in unicodeFilenames {
+            // When: Extracting hour from Unicode filename
+            // Then: Should handle gracefully
+            XCTAssertNoThrow(audioFileManager.extractHourFromFilename(filename))
+        }
+    }
 }

@@ -1,6 +1,8 @@
 import SwiftUI
+import os.log
 
 struct MenuBarView: View {
+    private let logger = Logger(subsystem: "com.example.HourlyAudioPlayer", category: "MenuBarView")
     @StateObject private var audioFileManager = AudioFileManager.shared
     @StateObject private var hourlyTimer = HourlyTimer.shared
     @State private var showingSettings = false
@@ -23,14 +25,46 @@ struct MenuBarView: View {
                 Spacer()
 
                 Button(action: {
-                    // Close the popover by sending a close action
-                    NSApp.sendAction(#selector(NSPopover.performClose(_:)), to: nil, from: nil)
+                    logger.debug("Close button tapped")
+                    // Try multiple approaches to close the popover
+                    
+                    // Approach 1: Direct popover close
+                    if let appDelegate = NSApp.delegate as? AppDelegate,
+                       let popover = appDelegate.popover {
+                        logger.debug("Closing via direct popover reference")
+                        popover.performClose(nil)
+                        return
+                    }
+                    
+                    // Approach 2: Find popover in windows
+                    for window in NSApp.windows {
+                        if let popover = window as? NSPopover {
+                            logger.debug("Closing popover found in NSApp.windows")
+                            popover.performClose(nil)
+                            return
+                        }
+                    }
+                    
+                    // Approach 3: Close current window
+                    if let currentWindow = NSApp.keyWindow {
+                        logger.debug("Closing current key window")
+                        currentWindow.close()
+                        return
+                    }
+                    
+                    // Approach 4: Use status bar button method
+                    if let appDelegate = NSApp.delegate as? AppDelegate {
+                        logger.debug("Closing via statusBarButtonClicked()")
+                        appDelegate.statusBarButtonClicked()
+                    } else {
+                        logger.error("App delegate not found; cannot close popover")
+                    }
                 }, label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.title2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.red)
                 })
-                .buttonStyle(.plain)
+                .buttonStyle(.bordered)
                 .help("Close")
             }
 
@@ -72,12 +106,14 @@ struct MenuBarView: View {
                 .frame(maxWidth: .infinity)
                 .keyboardShortcut("s", modifiers: .command)
 
-                Button("Test Current Hour") {
-                    hourlyTimer.playCurrentHourAudio()
-                }
-                .buttonStyle(.bordered)
-                .frame(maxWidth: .infinity)
-                .keyboardShortcut("t", modifiers: .command)
+                    #if DEBUG_MODE
+                    Button("Test Current Hour") {
+                        hourlyTimer.playCurrentHourAudio()
+                    }
+                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity)
+                    .keyboardShortcut("t", modifiers: .command)
+                    #endif
 
                 Button("About") {
                     showingAbout = true
