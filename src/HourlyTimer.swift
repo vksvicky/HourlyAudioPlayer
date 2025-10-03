@@ -50,10 +50,18 @@ class HourlyTimer: ObservableObject {
     }
 
     private func playHourlyAudio() {
-        let currentHour = Calendar.current.component(.hour, from: Date())
+        let now = Date()
+        let currentHour = Calendar.current.component(.hour, from: now)
+
+        // Debug logging for timezone information
+        logger.info("🕐 Current time: \(now)")
+        logger.info("🕐 Current hour (24h): \(currentHour)")
+        logger.info("🕐 Timezone: \(TimeZone.current.identifier)")
+        logger.info("🕐 Timezone offset: \(TimeZone.current.secondsFromGMT()) seconds")
 
         // Avoid playing the same hour multiple times
         if currentHour == lastPlayedHour {
+            logger.info("⏭️ Skipping - already played hour \(currentHour)")
             return
         }
 
@@ -119,10 +127,36 @@ class HourlyTimer: ObservableObject {
         let content = UNMutableNotificationContent()
         content.title = "Hourly Audio Player"
 
-        if let audioFile = audioFile {
-            content.body = "Playing audio for \(hour):00 - \(audioFile.name)"
+        // Format the hour for display in 12-hour format with AM/PM
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        formatter.timeZone = TimeZone.current
+
+        // Create a date for the current hour to format it properly
+        let calendar = Calendar.current
+        let now = Date()
+
+        // Create a date for the hour we're playing audio for
+        var dateComponents = calendar.dateComponents([.year, .month, .day], from: now)
+        dateComponents.hour = hour
+        dateComponents.minute = 0
+        dateComponents.second = 0
+
+        if let hourDate = calendar.date(from: dateComponents) {
+            let formattedTime = formatter.string(from: hourDate)
+
+            if let audioFile = audioFile {
+                content.body = "Playing audio for \(formattedTime) - \(audioFile.name)"
+            } else {
+                content.body = "Playing system sound for \(formattedTime) (no custom audio set)"
+            }
         } else {
-            content.body = "Playing system sound for \(hour):00 (no custom audio set)"
+            // Fallback to 24-hour format if date creation fails
+            if let audioFile = audioFile {
+                content.body = "Playing audio for \(hour):00 - \(audioFile.name)"
+            } else {
+                content.body = "Playing system sound for \(hour):00 (no custom audio set)"
+            }
         }
 
         content.sound = nil // We're playing our own audio
@@ -139,12 +173,35 @@ class HourlyTimer: ObservableObject {
             }
         }
     }
-    
+
     private func sendMissingFileNotification(for hour: Int, audioFile: AudioFile) {
         let content = UNMutableNotificationContent()
         content.title = "⚠️ Audio File Missing"
-        content.body = "Could not play '\(audioFile.name)' for \(hour):00. File may be missing, moved, or corrupted. Playing system sound instead."
-        
+
+        // Format the hour for display in 12-hour format with AM/PM
+        let formatter = DateFormatter()
+        formatter.dateFormat = "h:mm a"
+        formatter.timeZone = TimeZone.current
+
+        let calendar = Calendar.current
+        let now = Date()
+
+        // Create a date for the hour we're playing audio for
+        var dateComponents = calendar.dateComponents([.year, .month, .day], from: now)
+        dateComponents.hour = hour
+        dateComponents.minute = 0
+        dateComponents.second = 0
+
+        let formattedTime: String
+        if let hourDate = calendar.date(from: dateComponents) {
+            formattedTime = formatter.string(from: hourDate)
+        } else {
+            formattedTime = "\(hour):00" // Fallback
+        }
+
+        content.body = "Could not play '\(audioFile.name)' for \(formattedTime). " +
+                      "File may be missing, moved, or corrupted. Playing system sound instead."
+
         // Use a warning sound for missing files
         content.sound = UNNotificationSound.default
 
@@ -194,7 +251,8 @@ class HourlyTimer: ObservableObject {
 
         if let audioFile = audioFileManager.getAudioFile(for: currentHour) {
             logger.info(
-                "🐛 DEBUG: Found audio file: \(audioFile.name) - playing audio and sending notification"
+                "🐛 DEBUG: Found audio file: \(audioFile.name) - " +
+                "playing audio and sending notification"
             )
             let success = audioManager.playAudio(from: audioFile)
             if success {

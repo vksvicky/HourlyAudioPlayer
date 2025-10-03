@@ -16,6 +16,7 @@
 		A1234567890123456789014A /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789014B /* MenuBarView.swift */; };
 		A1234567890123456789014C /* HourlyAudioPlayer.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789014D /* HourlyAudioPlayer.entitlements */; };
 		A1234567890123456789015B /* AboutWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015C /* AboutWindow.swift */; };
+		A1234567890123456789015D /* PongGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789015E /* PongGameView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +29,7 @@
 		A1234567890123456789014B /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = src/MenuBarView.swift; sourceTree = "<group>"; };
 		A1234567890123456789014D /* HourlyAudioPlayer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = src/HourlyAudioPlayer.entitlements; sourceTree = "<group>"; };
 		A1234567890123456789015C /* AboutWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = src/AboutWindow.swift; sourceTree = "<group>"; };
+		A1234567890123456789015E /* PongGameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = src/PongGameView.swift; sourceTree = "<group>"; };
 		A1234567890123456789015A /* HourlyAudioPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HourlyAudioPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -60,6 +62,7 @@
 				A1234567890123456789013F /* AudioFileManager.swift */,
 				A1234567890123456789014B /* MenuBarView.swift */,
 				A1234567890123456789015C /* AboutWindow.swift */,
+				A1234567890123456789015E /* PongGameView.swift */,
 				A1234567890123456789012F /* Assets.xcassets */,
 				A1234567890123456789014D /* HourlyAudioPlayer.entitlements */,
 			);
@@ -149,6 +152,7 @@
 				A1234567890123456789013E /* AudioFileManager.swift in Sources */,
 				A1234567890123456789014A /* MenuBarView.swift in Sources */,
 				A1234567890123456789015B /* AboutWindow.swift in Sources */,
+				A1234567890123456789015D /* PongGameView.swift in Sources */,
 				A1234567890123456789012A /* HourlyAudioPlayerApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -282,7 +286,7 @@
 				CODE_SIGN_ENTITLEMENTS = src/HourlyAudioPlayer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 77;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_ASSET_PATHS = "\"src/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -308,7 +312,7 @@
 				CODE_SIGN_ENTITLEMENTS = src/HourlyAudioPlayer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 77;
+				CURRENT_PROJECT_VERSION = 88;
 				DEVELOPMENT_ASSET_PATHS = "\"src/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

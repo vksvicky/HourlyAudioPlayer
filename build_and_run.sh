@@ -151,8 +151,8 @@ else
     fi
 fi
 
-# Find the built app
-APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "HourlyAudioPlayer.app" -path "*/Debug/*" | head -1)
+# Find the built app (exclude Index.noindex paths as they may be incomplete)
+APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "HourlyAudioPlayer.app" -path "*/Debug/*" | grep -v "Index.noindex" | head -1)
 
 if [ -z "$APP_PATH" ]; then
     print_error "Could not find the built app. Build may have failed."

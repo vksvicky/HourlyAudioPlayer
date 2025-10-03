@@ -60,11 +60,11 @@ struct MenuBarView: View {
                         logger.error("App delegate not found; cannot close popover")
                     }
                 }, label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
+                    Text("×")
+                        .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.red)
                 })
-                .buttonStyle(.bordered)
+                .buttonStyle(.plain)
                 .help("Close")
             }
 
@@ -132,6 +132,7 @@ struct MenuBarView: View {
         }
         .padding()
         .frame(width: 300)
+        .background(Color.white)
         .sheet(isPresented: $showingSettings) {
             ContentView()
         }

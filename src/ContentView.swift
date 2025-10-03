@@ -11,18 +11,19 @@ struct ContentView: View {
                 Text("Hourly Audio Player")
                     .font(.largeTitle)
                     .fontWeight(.bold)
+                    .padding(.leading, 8)
 
                 Spacer()
 
-                Button(action: {
-                    dismiss()
-                }, label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title2)
-                        .foregroundColor(.secondary)
-                })
-                .buttonStyle(.plain)
-                .help("Close Settings")
+                Text("×")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundColor(.red)
+                    .padding(.trailing, 18)
+                    .padding(.top, 6)
+                    .onTapGesture {
+                        dismiss()
+                    }
+                    .help("Close Settings")
             }
 
             Text("Configure audio files for each hour of the day")
@@ -69,6 +70,7 @@ struct ContentView: View {
             .padding()
         }
         .frame(width: 500, height: 600)
+        .background(Color.white)
     }
 }
 
