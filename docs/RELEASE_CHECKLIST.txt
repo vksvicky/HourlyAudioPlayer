@@ -48,8 +48,8 @@ Hourly Audio Player Release Checklist
 
 📊 RELEASE METRICS
 ==================
-Version: 1.0.0
-Build Date: 2025-10-02 21:57:58
+Version: 1.1.0
+Build Date: 2025-10-03 09:21:32
 DMG Size: 
 ZIP Size: 
 Total Files: 4 (DMG, ZIP, Release Notes, Troubleshoot Script)

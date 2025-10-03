@@ -54,6 +54,10 @@ fi
 RELEASE_DIR="releases"
 mkdir -p "$RELEASE_DIR"
 
+# Create docs directory if it doesn't exist
+DOCS_DIR="docs"
+mkdir -p "$DOCS_DIR"
+
 # Clean previous builds
 print_status "Cleaning previous builds..."
 xcodebuild clean -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer > /dev/null 2>&1 || true
@@ -95,8 +99,8 @@ DMG_PATH="$RELEASE_DIR/$DMG_NAME"
 # Remove existing DMG if it exists
 rm -f "$DMG_PATH"
 
-# Create comprehensive release notes
-RELEASE_NOTES="$RELEASE_DIR/RELEASE_NOTES_v$VERSION.txt"
+# Create comprehensive release notes in docs folder
+RELEASE_NOTES="$DOCS_DIR/RELEASE_NOTES_v$VERSION.txt"
 cat > "$RELEASE_NOTES" << EOF
 Hourly Audio Player v$VERSION
 ============================
@@ -138,7 +142,7 @@ The DMG/ZIP package includes:
 
 💻 SYSTEM REQUIREMENTS
 ======================
-• macOS 14.0 or later
+• macOS 12.0 or later
 • Intel or Apple Silicon processor
 • Audio files in supported formats
 • Microphone/audio output device
@@ -235,7 +239,7 @@ Audio System Issues:
 ====================
 • Maximum file size: 2.5MB per audio file
 • Supported formats: MP3, WAV, M4A, AIFF, AAC, FLAC, OGG
-• Requires macOS 14.0 or later
+• Requires macOS 12.0 or later
 • Menu bar icon may not appear immediately after installation
 • Some audio formats may require additional codecs
 
@@ -252,8 +256,8 @@ For technical support, please provide:
 • Steps to reproduce the issue
 EOF
 
-# Create troubleshooting script
-TROUBLESHOOT_SCRIPT="$RELEASE_DIR/troubleshoot.sh"
+# Create troubleshooting script in docs folder
+TROUBLESHOOT_SCRIPT="$DOCS_DIR/troubleshoot.sh"
 cat > "$TROUBLESHOOT_SCRIPT" << 'EOF'
 #!/bin/bash
 
@@ -439,8 +443,8 @@ EOF
 chmod +x "$TROUBLESHOOT_SCRIPT"
 
 
-# Create quick start guide
-QUICK_START="$RELEASE_DIR/QUICK_START_GUIDE.txt"
+# Create quick start guide in docs folder
+QUICK_START="$DOCS_DIR/QUICK_START_GUIDE.txt"
 cat > "$QUICK_START" << EOF
 Hourly Audio Player - Quick Start Guide
 =======================================
@@ -505,8 +509,8 @@ Hourly Audio Player - Quick Start Guide
 Happy listening! 🎧
 EOF
 
-# Create release checklist
-RELEASE_CHECKLIST="$RELEASE_DIR/RELEASE_CHECKLIST.txt"
+# Create release checklist in docs folder
+RELEASE_CHECKLIST="$DOCS_DIR/RELEASE_CHECKLIST.txt"
 cat > "$RELEASE_CHECKLIST" << EOF
 Hourly Audio Player Release Checklist
 =====================================
@@ -580,7 +584,7 @@ cp -R "$RELEASE_PACKAGE.app" "$TEMP_DMG_DIR/"
 # Create Applications symlink
 ln -s /Applications "$TEMP_DMG_DIR/Applications"
 
-# Copy documentation files to DMG
+# Copy documentation files to DMG from docs folder
 cp "$RELEASE_NOTES" "$TEMP_DMG_DIR/"
 cp "$TROUBLESHOOT_SCRIPT" "$TEMP_DMG_DIR/"
 cp "$QUICK_START" "$TEMP_DMG_DIR/"
@@ -598,7 +602,11 @@ print_status "Creating ZIP archive..."
 ZIP_NAME="$RELEASE_NAME.zip"
 ZIP_PATH="$RELEASE_DIR/$ZIP_NAME"
 cd "$RELEASE_DIR"
-zip -r "$ZIP_NAME" "$RELEASE_NAME.app" "RELEASE_NOTES_v$VERSION.txt" "troubleshoot.sh" "QUICK_START_GUIDE.txt" "RELEASE_CHECKLIST.txt" > /dev/null
+zip -r "$ZIP_NAME" "$RELEASE_NAME.app" > /dev/null
+cd ..
+# Add documentation files from docs folder to ZIP
+cd "$DOCS_DIR"
+zip -r "../$RELEASE_DIR/$ZIP_NAME" "RELEASE_NOTES_v$VERSION.txt" "troubleshoot.sh" "QUICK_START_GUIDE.txt" "RELEASE_CHECKLIST.txt" > /dev/null
 cd ..
 
 # Get file sizes
@@ -624,6 +632,9 @@ echo "  📋 Release Checklist: RELEASE_CHECKLIST.txt"
 echo ""
 print_header "Release Location:"
 echo "  📁 $RELEASE_DIR/"
+echo ""
+print_header "Documentation Location:"
+echo "  📁 $DOCS_DIR/"
 echo ""
 print_header "Distribution Files:"
 echo "  🎵 $DMG_PATH"

@@ -1,0 +1,152 @@
+Hourly Audio Player v1.1.0
+============================
+
+Build Date: 2025-10-03 09:21:32
+Build Type: Release
+Architecture: Universal (Intel & Apple Silicon)
+
+🎵 FEATURES
+===========
+• Menu bar app with speaker icon
+• 24-hour audio file configuration (0:00 - 23:00)
+• Automatic hourly audio playback
+• Support for multiple audio formats (MP3, WAV, M4A, AIFF, AAC, FLAC, OGG)
+• Smart filename-based hour detection (e.g., "12_midday.mp3" → 12:00)
+• User notifications for audio playback
+• Manual testing functionality
+• Persistent audio file storage
+• Real-time clock display
+• Debug mode for development testing
+• File validation (size limits, format checking)
+• Missing file detection with fallback to system sounds
+
+📦 INSTALLATION
+===============
+1. Download the DMG file: HourlyAudioPlayer-v1.1.0.dmg
+2. Double-click the DMG to mount it
+3. Drag HourlyAudioPlayer.app to your Applications folder
+4. Launch the app from Applications or Spotlight
+5. Grant necessary permissions when prompted
+
+📚 DOCUMENTATION INCLUDED
+==========================
+The DMG/ZIP package includes:
+• RELEASE_NOTES_v1.1.0.txt - Complete documentation
+• troubleshoot.sh - Automated diagnostic script
+• QUICK_START_GUIDE.txt - 5-minute setup guide
+• RELEASE_CHECKLIST.txt - Quality assurance checklist
+
+💻 SYSTEM REQUIREMENTS
+======================
+• macOS 12.0 or later
+• Intel or Apple Silicon processor
+• Audio files in supported formats
+• Microphone/audio output device
+• Internet connection (for notifications)
+
+🎯 USAGE GUIDE
+==============
+1. Look for the speaker icon in your menu bar
+2. Click the icon to open the app interface
+3. Use "Open Settings" to configure audio files for each hour
+4. The app will automatically play audio at the top of each hour
+5. Use "Test Current Hour" to verify audio playback
+
+🔧 TROUBLESHOOTING
+==================
+
+Common Issues & Solutions:
+
+1. APP NOT APPEARING IN MENU BAR
+   • Check System Preferences > Security & Privacy > Privacy > Accessibility
+   • Ensure HourlyAudioPlayer has accessibility permissions
+   • Restart the app or reboot your Mac
+   • Check if the app is running in Activity Monitor
+
+2. AUDIO NOT PLAYING
+   • Verify audio files are assigned to the current hour
+   • Check System Preferences > Sound > Output
+   • Ensure audio files are in supported formats
+   • Use "Test Current Hour" to verify playback
+   • Check Console.app for error messages
+
+3. NOTIFICATIONS NOT WORKING
+   • Go to System Preferences > Notifications & Focus
+   • Find HourlyAudioPlayer and enable notifications
+   • Check "Allow notifications" is turned on
+   • Verify notification permissions in System Preferences
+
+4. AUDIO FILES NOT LOADING
+   • Check file format (MP3, WAV, M4A, AIFF, AAC, FLAC, OGG)
+   • Verify file size is under 2.5MB
+   • Ensure file is not corrupted
+   • Check file permissions (read access required)
+
+5. APP CRASHES OR FREEZES
+   • Check Console.app for crash logs
+   • Restart the app
+   • Clear app data: ~/Library/Application Support/HourlyAudioPlayer/
+   • Reinstall the app
+
+6. DEBUGGING ISSUES
+   • Run with debug mode: ./build_and_run.sh minor debug
+   • Check Console.app for log messages
+   • Look for "HourlyAudioPlayer" in system logs
+   • Use Activity Monitor to check app status
+
+7. PERFORMANCE ISSUES
+   • Close other audio applications
+   • Check available disk space
+   • Restart the app periodically
+   • Monitor CPU usage in Activity Monitor
+
+🔍 ADVANCED TROUBLESHOOTING
+===========================
+
+Log Analysis:
+• Open Console.app (Applications > Utilities)
+• Search for "HourlyAudioPlayer"
+• Look for error messages or warnings
+• Check system.log for related entries
+
+File System Issues:
+• Verify audio directory exists: ~/Library/Application Support/HourlyAudioPlayer/
+• Check file permissions: ls -la ~/Library/Application\ Support/HourlyAudioPlayer/
+• Clear corrupted data: rm -rf ~/Library/Application\ Support/HourlyAudioPlayer/
+
+Network Issues:
+• Check internet connection for notifications
+• Verify firewall settings
+• Test with different network connections
+
+Audio System Issues:
+• Reset audio system: sudo killall coreaudiod
+• Check audio drivers and hardware
+• Test with different audio output devices
+
+🆘 SUPPORT & FEEDBACK
+=====================
+• Check the project repository for updates
+• Report issues with detailed logs
+• Include system information (macOS version, hardware)
+• Provide steps to reproduce problems
+
+📋 KNOWN LIMITATIONS
+====================
+• Maximum file size: 2.5MB per audio file
+• Supported formats: MP3, WAV, M4A, AIFF, AAC, FLAC, OGG
+• Requires macOS 12.0 or later
+• Menu bar icon may not appear immediately after installation
+• Some audio formats may require additional codecs
+
+🔄 UPDATES
+==========
+• Check for updates regularly
+• Backup your audio files before updating
+• New versions may require re-granting permissions
+
+For technical support, please provide:
+• macOS version (System Information)
+• App version: 1.1.0
+• Error messages from Console.app
+• Steps to reproduce the issue

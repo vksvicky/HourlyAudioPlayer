@@ -38,7 +38,7 @@ The DMG/ZIP package includes:
 
 💻 SYSTEM REQUIREMENTS
 ======================
-• macOS 14.0 or later
+• macOS 12.0 or later
 • Intel or Apple Silicon processor
 • Audio files in supported formats
 • Microphone/audio output device
@@ -135,7 +135,7 @@ Audio System Issues:
 ====================
 • Maximum file size: 2.5MB per audio file
 • Supported formats: MP3, WAV, M4A, AIFF, AAC, FLAC, OGG
-• Requires macOS 14.0 or later
+• Requires macOS 12.0 or later
 • Menu bar icon may not appear immediately after installation
 • Some audio formats may require additional codecs
 

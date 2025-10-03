@@ -237,8 +237,8 @@ classDiagram
 
 ### Prerequisites
 
-- macOS 14.0 or later
-- Xcode 15.0 or later (for development)
+- macOS 12.0 or later
+- Xcode 13.0 or later (for development)
 
 ### Installation
 

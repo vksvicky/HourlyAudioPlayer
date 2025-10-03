@@ -31,6 +31,11 @@ print_error() {
 
 echo "🧪 Running Hourly Audio Player Working Tests"
 echo "============================================"
+echo "📋 Including macOS Version Compatibility Tests"
+echo "   • macOS 12.0+ compatibility validation"
+echo "   • Cross-version functionality tests"
+echo "   • CI/CD environment tests"
+echo ""
 
 # Check if we're in the right directory
 if [ ! -f "HourlyAudioPlayer.xcodeproj/project.pbxproj" ]; then
@@ -65,6 +70,23 @@ print_success "Found all test files:"
 for test_file in "${test_files[@]}"; do
     echo "   • $test_file"
 done
+
+# Check macOS version compatibility
+print_status "Checking macOS version compatibility..."
+macos_version=$(sw_vers -productVersion)
+macos_major=$(echo $macos_version | cut -d. -f1)
+macos_minor=$(echo $macos_version | cut -d. -f2)
+
+echo "   Current macOS version: $macos_version"
+echo "   Major version: $macos_major"
+echo "   Minor version: $macos_minor"
+
+if [ "$macos_major" -ge 12 ]; then
+    print_success "✅ macOS version is compatible (12.0+ required)"
+else
+    print_error "❌ macOS version is too old (12.0+ required)"
+    exit 1
+fi
 
 # First, let's build the main project to make sure it compiles
 print_status "Building main project..."
@@ -294,6 +316,9 @@ happy_path_tests=0
 negative_tests=0
 error_tests=0
 edge_case_tests=0
+compatibility_tests=0
+version_specific_tests=0
+ci_tests=0
 
 for test_file in "${test_files[@]}"; do
     if [ -f "$test_file" ]; then
@@ -301,32 +326,66 @@ for test_file in "${test_files[@]}"; do
         happy=$(grep -c "test.*[Hh]appy\|test.*[Ss]uccess\|test.*[Ww]orks" "$test_file" 2>/dev/null || echo "0")
         negative=$(grep -c "test.*[Nn]egative\|test.*[Ff]ail\|test.*[Ee]rror" "$test_file" 2>/dev/null || echo "0")
         edge=$(grep -c "test.*[Ee]dge\|test.*[Cc]orner\|test.*[Oo]dd" "$test_file" 2>/dev/null || echo "0")
+        compatibility=$(grep -c "test.*[Cc]ompatibility\|test.*[Vv]ersion" "$test_file" 2>/dev/null || echo "0")
+        version_specific=$(grep -c "test.*[Mm]acOS.*[Ss]pecific\|test.*[Vv]ersion.*[Ss]pecific" "$test_file" 2>/dev/null || echo "0")
+        ci=$(grep -c "test.*[Cc][Ii]\|test.*[Cc][Ii][Ee]nvironment" "$test_file" 2>/dev/null || echo "0")
         
         # Handle case where grep returns multiple lines
         happy=$(echo "$happy" | head -1)
         negative=$(echo "$negative" | head -1)
         edge=$(echo "$edge" | head -1)
+        compatibility=$(echo "$compatibility" | head -1)
+        version_specific=$(echo "$version_specific" | head -1)
+        ci=$(echo "$ci" | head -1)
         
         happy_path_tests=$((happy_path_tests + happy))
         negative_tests=$((negative_tests + negative))
         edge_case_tests=$((edge_case_tests + edge))
+        compatibility_tests=$((compatibility_tests + compatibility))
+        version_specific_tests=$((version_specific_tests + version_specific))
+        ci_tests=$((ci_tests + ci))
     fi
 done
 
 echo "   • Happy path tests: $happy_path_tests"
 echo "   • Negative path tests: $negative_tests"
 echo "   • Edge case tests: $edge_case_tests"
+echo "   • Compatibility tests: $compatibility_tests"
+echo "   • Version-specific tests: $version_specific_tests"
+echo "   • CI/CD tests: $ci_tests"
 
 # Test quality assessment
-total_scenario_tests=$((happy_path_tests + negative_tests + edge_case_tests))
-if [ $total_scenario_tests -ge 15 ]; then
-    print_success "✅ Comprehensive test scenarios!"
+total_scenario_tests=$((happy_path_tests + negative_tests + edge_case_tests + compatibility_tests + version_specific_tests + ci_tests))
+if [ $total_scenario_tests -ge 25 ]; then
+    print_success "✅ Comprehensive test scenarios including OS version compatibility!"
+elif [ $total_scenario_tests -ge 15 ]; then
+    print_success "✅ Good test scenario coverage including compatibility tests!"
 elif [ $total_scenario_tests -ge 8 ]; then
-    print_success "✅ Good test scenario coverage!"
-elif [ $total_scenario_tests -ge 4 ]; then
-    print_warning "⚠️  Basic test scenario coverage"
+    print_success "✅ Basic test scenario coverage with some compatibility tests"
 else
     print_warning "⚠️  Limited test scenario coverage"
+fi
+
+# macOS version compatibility assessment
+if [ $compatibility_tests -ge 5 ]; then
+    print_success "✅ Excellent macOS version compatibility coverage!"
+elif [ $compatibility_tests -ge 3 ]; then
+    print_success "✅ Good macOS version compatibility coverage!"
+elif [ $compatibility_tests -ge 1 ]; then
+    print_warning "⚠️  Basic macOS version compatibility coverage"
+else
+    print_warning "⚠️  No macOS version compatibility tests found"
+fi
+
+# CI/CD test assessment
+if [ $ci_tests -ge 5 ]; then
+    print_success "✅ Excellent CI/CD test coverage!"
+elif [ $ci_tests -ge 3 ]; then
+    print_success "✅ Good CI/CD test coverage!"
+elif [ $ci_tests -ge 1 ]; then
+    print_warning "⚠️  Basic CI/CD test coverage"
+else
+    print_warning "⚠️  No CI/CD tests found"
 fi
 
 # Clean up temp directory
