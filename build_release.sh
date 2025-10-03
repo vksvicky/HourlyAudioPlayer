@@ -256,6 +256,31 @@ For technical support, please provide:
 • Steps to reproduce the issue
 EOF
 
+# Append auto-generated release notes from git history
+if command -v git >/dev/null 2>&1 && [ -d .git ]; then
+    print_status "Generating changelog from recent git commits..."
+    LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+    if [ -n "$LAST_TAG" ]; then
+        GIT_RANGE="$LAST_TAG..HEAD"
+        RANGE_LABEL="Changes since $LAST_TAG"
+    else
+        GIT_RANGE="--since=30.days"
+        RANGE_LABEL="Changes in the last 30 days"
+    fi
+
+    {
+        echo ""
+        echo "📝 CHANGELOG"
+        echo "================"
+        echo "$RANGE_LABEL:"
+        echo ""
+        git log $GIT_RANGE --pretty=format:"- %s (%h) — %an" || echo "- No recent changes found"
+        echo ""
+    } >> "$RELEASE_NOTES"
+else
+    print_warning "Git not available; skipping automatic changelog generation."
+fi
+
 # Create troubleshooting script in docs folder
 TROUBLESHOOT_SCRIPT="$DOCS_DIR/troubleshoot.sh"
 cat > "$TROUBLESHOOT_SCRIPT" << 'EOF'
