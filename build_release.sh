@@ -90,9 +90,9 @@ if [ -f "$INFO_PLIST" ]; then
     /usr/libexec/PlistBuddy -c "Set :NSAboutPanelOptions:NSVersion '$VERSION (Build $BUILD_NUMBER)'" "$INFO_PLIST" >/dev/null 2>&1 || true
 fi
 
-# Build Release version (pass overrides to ensure consistency)
+# Build Release version (pass overrides to ensure consistency and universal binary)
 print_status "Building Release version..."
-if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Release MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" build; then
+if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Release MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO build; then
     print_success "Release build completed successfully!"
 else
     print_error "Release build failed!"

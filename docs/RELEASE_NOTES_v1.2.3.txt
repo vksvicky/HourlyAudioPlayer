@@ -1,9 +1,10 @@
-Hourly Audio Player v1.0.0
+Hourly Audio Player v1.2.3
 ============================
 
-Build Date: 2025-10-02 21:57:58
+Build Date: 2025-10-03 16:39:13
 Build Type: Release
 Architecture: Universal (Intel & Apple Silicon)
+Bundle ID: club.cycleruncode.HourlyAudioPlayer
 
 🎵 FEATURES
 ===========
@@ -19,10 +20,23 @@ Architecture: Universal (Intel & Apple Silicon)
 • Debug mode for development testing
 • File validation (size limits, format checking)
 • Missing file detection with fallback to system sounds
+• Pong easter egg game with keyboard controls
+• Consistent UI design across all windows
+• Universal binary support (Intel & Apple Silicon)
+
+🆕 NEW IN v1.2.x
+================
+• Fixed universal binary compatibility for Intel Macs
+• Updated bundle identifier to club.cycleruncode.HourlyAudioPlayer
+• Improved version management in build system
+• Enhanced release notes generation with changelog
+• Consistent UI styling with white backgrounds and red close buttons
+• Pong game improvements with keyboard controls and better AI
+• Fixed layout shifts and button visibility issues
 
 📦 INSTALLATION
 ===============
-1. Download the DMG file: HourlyAudioPlayer-v1.0.0.dmg
+1. Download the DMG file: HourlyAudioPlayer-v1.2.3.dmg
 2. Double-click the DMG to mount it
 3. Drag HourlyAudioPlayer.app to your Applications folder
 4. Launch the app from Applications or Spotlight
@@ -31,7 +45,7 @@ Architecture: Universal (Intel & Apple Silicon)
 📚 DOCUMENTATION INCLUDED
 ==========================
 The DMG/ZIP package includes:
-• RELEASE_NOTES_v1.0.0.txt - Complete documentation
+• RELEASE_NOTES_v1.2.3.txt - Complete documentation
 • troubleshoot.sh - Automated diagnostic script
 • QUICK_START_GUIDE.txt - 5-minute setup guide
 • RELEASE_CHECKLIST.txt - Quality assurance checklist
@@ -51,6 +65,7 @@ The DMG/ZIP package includes:
 3. Use "Open Settings" to configure audio files for each hour
 4. The app will automatically play audio at the top of each hour
 5. Use "Test Current Hour" to verify audio playback
+6. Try the Pong easter egg by clicking "About" and then the app icon!
 
 🔧 TROUBLESHOOTING
 ==================
@@ -100,6 +115,11 @@ Common Issues & Solutions:
    • Restart the app periodically
    • Monitor CPU usage in Activity Monitor
 
+8. INTEL MAC COMPATIBILITY
+   • Ensure you're using v1.2.3 or later
+   • The app now includes universal binary support
+   • If issues persist, try reinstalling the latest version
+
 🔍 ADVANCED TROUBLESHOOTING
 ===========================
 
@@ -147,6 +167,65 @@ Audio System Issues:
 
 For technical support, please provide:
 • macOS version (System Information)
-• App version: 1.0.0
+• App version: 1.2.3
 • Error messages from Console.app
 • Steps to reproduce the issue
+
+📝 COMPLETE CHANGELOG
+=====================
+All changes from v1.0.0 to v1.2.3:
+
+v1.2.3 (2025-10-03)
+• Fixed universal binary compatibility for Intel Macs
+• Updated bundle identifier to club.cycleruncode.HourlyAudioPlayer
+• Enhanced build system with proper architecture support
+• Improved release notes generation
+
+v1.2.2 (2025-10-03)
+• Fixed version management in build system
+• Improved changelog generation from git commits
+• Enhanced release packaging
+
+v1.2.1 (2025-10-03)
+• Added comprehensive changelog generation
+• Fixed timezone issues with notifications
+• Added Pong easter egg game
+• Improved UI consistency across all windows
+• Fixed layout shifts and button visibility
+• Enhanced Pong game with keyboard controls and random AI speed
+
+v1.0.0 (2025-10-02)
+• Initial release
+• Menu bar app with speaker icon
+• 24-hour audio file configuration
+• Automatic hourly audio playback
+• Support for multiple audio formats
+• Smart filename-based hour detection
+• User notifications for audio playback
+• Manual testing functionality
+• Persistent audio file storage
+• Real-time clock display
+• Debug mode for development testing
+• File validation and missing file detection
+
+Recent Development History:
+- Minor fix (e6ab3eb) — vksvicky
+- Fixed a Timezone issue with notification and added an Easter egg (25beb6f) — vksvicky
+- Fixed a Timezone issue with notification and added an Easter egg (fd8efa6) — vksvicky
+- Updated release to support macOS 12+ (c4bae87) — vksvicky
+- Updated Release script (eca5584) — vksvicky
+- Test fixes (d3329f7) — vksvicky
+- Better tests and UI fixes (43a50c4) — vksvicky
+- Refactoring (19b8283) — vksvicky
+- Audio fixes (fc8d442) — vksvicky
+- Updated README and few other changes (cc792ee) — vksvicky
+- First commit (b33a612) — vksvicky
+
+🏆 VERSION HISTORY SUMMARY
+==========================
+v1.2.3: Universal binary support, proper bundle ID, enhanced build system
+v1.2.2: Version management fixes, improved release packaging
+v1.2.1: Changelog generation, timezone fixes, Pong easter egg, UI improvements
+v1.0.0: Initial release with core functionality
+
+This release represents the culmination of all improvements and fixes from the initial v1.0.0 release through the latest v1.2.3, providing a stable, feature-rich, and universally compatible macOS application.
