@@ -35,9 +35,27 @@ print_header() {
     echo -e "${PURPLE}[RELEASE]${NC} $1"
 }
 
-# Get version number from argument or use default
+# Get version number and optional build number
 VERSION=${1:-"1.0.0"}
+BUILD_NUMBER_INPUT=${2:-""}
 BUILD_DATE=$(date +"%Y-%m-%d %H:%M:%S")
+
+# Resolve build number: use input, else increment existing CFBundleVersion, else fallback to git rev count
+INFO_PLIST="src/Info.plist"
+if [ -z "$BUILD_NUMBER_INPUT" ]; then
+    if [ -f "$INFO_PLIST" ] && /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$INFO_PLIST" >/dev/null 2>&1; then
+        EXISTING_BUILD=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$INFO_PLIST" 2>/dev/null || echo "0")
+        if [[ "$EXISTING_BUILD" =~ ^[0-9]+$ ]]; then
+            BUILD_NUMBER=$((EXISTING_BUILD + 1))
+        else
+            BUILD_NUMBER=$(git rev-list --count HEAD 2>/dev/null || echo 1)
+        fi
+    else
+        BUILD_NUMBER=$(git rev-list --count HEAD 2>/dev/null || echo 1)
+    fi
+else
+    BUILD_NUMBER=$BUILD_NUMBER_INPUT
+fi
 
 echo "🏗️  Building Hourly Audio Player Release v$VERSION"
 echo "=================================================="
@@ -62,9 +80,19 @@ mkdir -p "$DOCS_DIR"
 print_status "Cleaning previous builds..."
 xcodebuild clean -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer > /dev/null 2>&1 || true
 
-# Build Release version
+# Update Info.plist with provided version and resolved build number
+if [ -f "$INFO_PLIST" ]; then
+    print_status "Updating Info.plist with version $VERSION ($BUILD_NUMBER)..."
+    /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$INFO_PLIST" || /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $VERSION" "$INFO_PLIST"
+    /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$INFO_PLIST" || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUMBER" "$INFO_PLIST"
+    # Also update About panel versions if present
+    /usr/libexec/PlistBuddy -c "Set :NSAboutPanelOptions:NSApplicationVersion $VERSION" "$INFO_PLIST" >/dev/null 2>&1 || true
+    /usr/libexec/PlistBuddy -c "Set :NSAboutPanelOptions:NSVersion '$VERSION (Build $BUILD_NUMBER)'" "$INFO_PLIST" >/dev/null 2>&1 || true
+fi
+
+# Build Release version (pass overrides to ensure consistency)
 print_status "Building Release version..."
-if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Release build; then
+if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Release MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" build; then
     print_success "Release build completed successfully!"
 else
     print_error "Release build failed!"

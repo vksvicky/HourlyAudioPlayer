@@ -1,7 +1,7 @@
-Hourly Audio Player v1.2.0
+Hourly Audio Player v1.2.2
 ============================
 
-Build Date: 2025-10-03 14:26:03
+Build Date: 2025-10-03 14:26:40
 Build Type: Release
 Architecture: Universal (Intel & Apple Silicon)
 
@@ -22,7 +22,7 @@ Architecture: Universal (Intel & Apple Silicon)
 
 📦 INSTALLATION
 ===============
-1. Download the DMG file: HourlyAudioPlayer-v1.2.0.dmg
+1. Download the DMG file: HourlyAudioPlayer-v1.2.2.dmg
 2. Double-click the DMG to mount it
 3. Drag HourlyAudioPlayer.app to your Applications folder
 4. Launch the app from Applications or Spotlight
@@ -31,7 +31,7 @@ Architecture: Universal (Intel & Apple Silicon)
 📚 DOCUMENTATION INCLUDED
 ==========================
 The DMG/ZIP package includes:
-• RELEASE_NOTES_v1.2.0.txt - Complete documentation
+• RELEASE_NOTES_v1.2.2.txt - Complete documentation
 • troubleshoot.sh - Automated diagnostic script
 • QUICK_START_GUIDE.txt - 5-minute setup guide
 • RELEASE_CHECKLIST.txt - Quality assurance checklist
@@ -147,7 +147,7 @@ Audio System Issues:
 
 For technical support, please provide:
 • macOS version (System Information)
-• App version: 1.2.0
+• App version: 1.2.2
 • Error messages from Console.app
 • Steps to reproduce the issue
 
