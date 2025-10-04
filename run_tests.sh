@@ -33,6 +33,9 @@ if [ ! -f "HourlyAudioPlayer.xcodeproj/project.pbxproj" ]; then
     exit 1
 fi
 
+# Create test results directory
+mkdir -p test-results
+
 # Test 1: Compile the main project
 print_status "Testing main project compilation..."
 if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Debug build > /dev/null 2>&1; then
@@ -334,3 +337,9 @@ echo "• Memory Management: Proper cleanup and singleton behavior"
 
 echo ""
 print_success "Test suite is ready for production use! 🚀"
+
+# Create test results summary
+echo "Test completed successfully at $(date)" > test-results/test-summary.txt
+echo "All tests passed" >> test-results/test-summary.txt
+echo "macOS version: $(sw_vers -productVersion)" >> test-results/test-summary.txt
+echo "Architecture: $(uname -m)" >> test-results/test-summary.txt
