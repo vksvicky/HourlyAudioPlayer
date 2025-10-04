@@ -21,7 +21,7 @@ class HourlyTimer: ObservableObject {
         // Stop any existing timer
         stop()
 
-        // Calculate time until next hour
+        // Calculate time until next hour with precise timing
         let now = Date()
         let calendar = Calendar.current
         let startOfCurrentHour = calendar.dateInterval(of: .hour, for: now)?.start ?? now
@@ -35,6 +35,7 @@ class HourlyTimer: ObservableObject {
         }
 
         logger.info("Hourly timer started. Next audio will play at: \(nextHour)")
+        logger.info("Time until next hour: \(timeInterval) seconds")
     }
 
     func stop() {
@@ -43,21 +44,41 @@ class HourlyTimer: ObservableObject {
     }
 
     private func scheduleNextHour() {
-        // Schedule the next hour
-        timer = Timer.scheduledTimer(withTimeInterval: 3600, repeats: true) { [weak self] _ in
+        // Calculate precise time until next hour to avoid drift
+        let now = Date()
+        let calendar = Calendar.current
+        let startOfCurrentHour = calendar.dateInterval(of: .hour, for: now)?.start ?? now
+        let nextHour = calendar.date(byAdding: .hour, value: 1, to: startOfCurrentHour)!
+        let timeInterval = nextHour.timeIntervalSince(now)
+
+        // Schedule timer for the next hour
+        timer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: false) { [weak self] _ in
             self?.playHourlyAudio()
+            self?.scheduleNextHour() // Recursively schedule the next hour
         }
+
+        logger.info("Next audio scheduled for: \(nextHour) (in \(timeInterval) seconds)")
     }
 
     private func playHourlyAudio() {
         let now = Date()
-        let currentHour = Calendar.current.component(.hour, from: now)
+        let calendar = Calendar.current
+        let currentHour = calendar.component(.hour, from: now)
+        let currentMinute = calendar.component(.minute, from: now)
+        let currentSecond = calendar.component(.second, from: now)
 
-        // Debug logging for timezone information
+        // Debug logging for precise timing information
         logger.info("🕐 Current time: \(now)")
         logger.info("🕐 Current hour (24h): \(currentHour)")
+        logger.info("🕐 Current minute: \(currentMinute)")
+        logger.info("🕐 Current second: \(currentSecond)")
         logger.info("🕐 Timezone: \(TimeZone.current.identifier)")
         logger.info("🕐 Timezone offset: \(TimeZone.current.secondsFromGMT()) seconds")
+
+        // Check if we're playing at the right time (should be close to minute 0)
+        if currentMinute > 2 {
+            logger.warning("⚠️ Audio playing \(currentMinute) minutes past the hour - timing may be off")
+        }
 
         // Avoid playing the same hour multiple times
         if currentHour == lastPlayedHour {
@@ -242,6 +263,30 @@ class HourlyTimer: ObservableObject {
         }
 
         return nil
+    }
+
+    func getTimingInfo() -> String {
+        let now = Date()
+        let calendar = Calendar.current
+        let currentHour = calendar.component(.hour, from: now)
+        let currentMinute = calendar.component(.minute, from: now)
+        let currentSecond = calendar.component(.second, from: now)
+
+        let startOfCurrentHour = calendar.dateInterval(of: .hour, for: now)?.start ?? now
+        let nextHour = calendar.date(byAdding: .hour, value: 1, to: startOfCurrentHour)!
+        let timeUntilNextHour = nextHour.timeIntervalSince(now)
+
+        let minutes = Int(timeUntilNextHour / 60)
+        let seconds = Int(timeUntilNextHour.truncatingRemainder(dividingBy: 60))
+        let timeString = String(format: "%02d:%02d", currentMinute, currentSecond)
+
+        return """
+        Current Time: \(now)
+        Current Hour: \(currentHour):\(timeString)
+        Time Until Next Hour: \(minutes) minutes \(seconds) seconds
+        Next Audio Time: \(nextHour)
+        Timezone: \(TimeZone.current.identifier)
+        """
     }
 
     #if DEBUG_MODE
