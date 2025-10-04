@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var audioFileManager = AudioFileManager.shared
     @StateObject private var hourlyTimer = HourlyTimer.shared
+    @StateObject private var themeManager = ThemeManager.shared
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -43,7 +44,29 @@ struct ContentView: View {
 
             Divider()
 
-            HStack {
+            HStack(alignment: .center, spacing: 8) {
+                // Theme Toggle on the left
+                Image(systemName: themeManager.themeIcon)
+                    .foregroundColor(.secondary)
+                    .frame(width: 16, height: 16)
+                
+                Text("Theme:")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                
+                Picker("Theme", selection: $themeManager.isDarkMode) {
+                    Text("Light").tag(false)
+                    Text("Dark").tag(true)
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .frame(width: 100, height: 24)
+                .onChange(of: themeManager.isDarkMode) { _ in
+                    // Force refresh when theme changes
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        themeManager.forceRefresh()
+                    }
+                }
+
                 Spacer()
 
                 #if DEBUG_MODE
@@ -67,16 +90,20 @@ struct ContentView: View {
                 .buttonStyle(.bordered)
                 .keyboardShortcut(.defaultAction)
             }
-            .padding()
+            .frame(height: 40)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal)
+            .padding(.bottom, 16)
         }
         .frame(width: 500, height: 600)
-        .background(Color.white)
+        .background(Color(NSColor.windowBackgroundColor))
     }
 }
 
 struct HourSlotView: View {
     let hour: Int
     @StateObject private var audioFileManager = AudioFileManager.shared
+    @StateObject private var themeManager = ThemeManager.shared
 
     var body: some View {
         VStack(spacing: 8) {
@@ -110,11 +137,11 @@ struct HourSlotView: View {
             }
         }
         .frame(width: 100, height: 80)
-        .background(Color.gray.opacity(0.1))
+        .background(themeManager.isDarkMode ? Color.gray.opacity(0.3) : Color.gray.opacity(0.1))
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                .stroke(themeManager.isDarkMode ? Color.gray.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
         )
     }
 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PongGameView: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var themeManager = ThemeManager.shared
     var onBackToAbout: (() -> Void)?
     @State private var ballPosition = CGPoint(x: 160, y: 200)
     @State private var ballVelocity = CGVector(dx: 3, dy: 2)
@@ -64,30 +65,30 @@ struct PongGameView: View {
             ZStack {
                     // Background
                     Rectangle()
-                        .fill(Color.black)
+                        .fill(Color(NSColor.controlBackgroundColor))
                         .frame(width: gameWidth, height: gameHeight - 80)
 
                     // Center line
                     Rectangle()
-                        .fill(Color.white)
+                        .fill(Color(NSColor.separatorColor))
                         .frame(width: 2, height: gameHeight - 80)
                         .opacity(0.3)
 
                     // Ball
                     Circle()
-                        .fill(Color.white)
+                        .fill(Color(NSColor.controlTextColor))
                         .frame(width: ballSize, height: ballSize)
                         .position(ballPosition)
 
                     // Player paddle (right side)
                     Rectangle()
-                        .fill(Color.white)
+                        .fill(Color(NSColor.controlTextColor))
                         .frame(width: paddleWidth, height: paddleHeight)
                         .position(x: gameWidth - 20, y: playerPaddleY)
 
                     // AI paddle (left side)
                     Rectangle()
-                        .fill(Color.white)
+                        .fill(Color(NSColor.controlTextColor))
                         .frame(width: paddleWidth, height: paddleHeight)
                         .position(x: 20, y: aiPaddleY)
                     
@@ -124,7 +125,7 @@ struct PongGameView: View {
                             Text(winner)
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundColor(.white)
+                                .foregroundColor(Color(NSColor.controlTextColor))
 
                             Button {
                                 resetGame()
@@ -141,7 +142,7 @@ struct PongGameView: View {
                             .controlSize(.large)
                         }
                         .padding(24)
-                        .background(Color.black.opacity(0.9))
+                        .background(Color(NSColor.controlBackgroundColor).opacity(0.9))
                         .cornerRadius(16)
                         .shadow(radius: 10)
                     }
@@ -163,7 +164,7 @@ struct PongGameView: View {
             Spacer()
                 }
                 .frame(width: gameWidth, height: gameHeight)
-                .background(Color.white)
+                .background(Color(NSColor.windowBackgroundColor))
         .onAppear {
             resetGame()
             setupKeyboardMonitoring()

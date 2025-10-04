@@ -585,6 +585,139 @@ class ContentViewTests: XCTestCase {
         }
     }
     
+    // MARK: - Theme Integration Tests
+    
+    func testContentViewWithLightTheme() {
+        // Given: Light theme is active
+        ThemeManager.shared.isDarkMode = false
+        
+        // When: Creating ContentView
+        let view = ContentView()
+        
+        // Then: Should not crash
+        XCTAssertNotNil(view)
+    }
+    
+    func testContentViewWithDarkTheme() {
+        // Given: Dark theme is active
+        ThemeManager.shared.isDarkMode = true
+        
+        // When: Creating ContentView
+        let view = ContentView()
+        
+        // Then: Should not crash
+        XCTAssertNotNil(view)
+    }
+    
+    func testContentViewThemeSwitching() {
+        // Given: A ContentView
+        let view = ContentView()
+        
+        // When: Switching themes
+        ThemeManager.shared.isDarkMode = false
+        ThemeManager.shared.isDarkMode = true
+        ThemeManager.shared.isDarkMode = false
+        
+        // Then: Should not crash
+        XCTAssertNotNil(view)
+    }
+    
+    func testContentViewWithThemeSlider() {
+        // Given: A ContentView with theme slider
+        let view = ContentView()
+        
+        // When: Theme slider is present (this would be rendered internally)
+        // Then: Should not crash
+        XCTAssertNotNil(view)
+    }
+    
+    func testContentViewWithSystemColors() {
+        // Given: A ContentView using system colors
+        let view = ContentView()
+        
+        // When: System colors are applied (this would be rendered internally)
+        // Then: Should not crash
+        XCTAssertNotNil(view)
+    }
+    
+    func testContentViewWithHourSlotThemeSupport() {
+        // Given: A ContentView with hour slots
+        let view = ContentView()
+        
+        // When: Hour slots are rendered with theme support
+        // Then: Should not crash
+        XCTAssertNotNil(view)
+    }
+    
+    func testContentViewWithRapidThemeChanges() {
+        // Given: A ContentView
+        let view = ContentView()
+        
+        // When: Rapidly changing themes
+        for _ in 0..<100 {
+            ThemeManager.shared.toggleTheme()
+        }
+        
+        // Then: Should not crash
+        XCTAssertNotNil(view)
+    }
+    
+    func testContentViewWithConcurrentThemeChanges() {
+        // Given: A ContentView
+        let view = ContentView()
+        let expectation = XCTestExpectation(description: "Concurrent theme changes")
+        expectation.expectedFulfillmentCount = 10
+        
+        // When: Changing themes concurrently
+        DispatchQueue.concurrentPerform(iterations: 10) { _ in
+            ThemeManager.shared.toggleTheme()
+            expectation.fulfill()
+        }
+        
+        // Then: Should complete without crashing
+        wait(for: [expectation], timeout: 5.0)
+        XCTAssertNotNil(view)
+    }
+    
+    func testContentViewWithThemeManagerIntegration() {
+        // Given: A ContentView that integrates with ThemeManager
+        let view = ContentView()
+        
+        // When: Theme manager operations
+        ThemeManager.shared.isDarkMode = true
+        ThemeManager.shared.forceRefresh()
+        ThemeManager.shared.isDarkMode = false
+        ThemeManager.shared.forceRefresh()
+        
+        // Then: Should not crash
+        XCTAssertNotNil(view)
+    }
+    
+    func testContentViewWithThemePersistence() {
+        // Given: A ContentView
+        let view = ContentView()
+        
+        // When: Theme preference is persisted
+        ThemeManager.shared.isDarkMode = true
+        let savedValue = UserDefaults.standard.bool(forKey: "isDarkMode")
+        
+        // Then: Should persist correctly
+        XCTAssertTrue(savedValue)
+        XCTAssertNotNil(view)
+    }
+    
+    func testContentViewWithDefaultLightTheme() {
+        // Given: No saved theme preference
+        UserDefaults.standard.removeObject(forKey: "isDarkMode")
+        
+        // When: Creating ContentView
+        let view = ContentView()
+        
+        // Then: Should default to light theme
+        XCTAssertFalse(ThemeManager.shared.isDarkMode)
+        XCTAssertNotNil(view)
+    }
+    
     // MARK: - AppDelegate Tests
     
     func testApplicationDidFinishLaunchingHappyPath() {

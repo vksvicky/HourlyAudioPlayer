@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AboutWindow: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var themeManager = ThemeManager.shared
     @State private var iconClickCount = 0
     @State private var showPongGame = false
     @State private var currentTransition: AnyTransition = .scale.combined(with: .opacity)
@@ -86,7 +87,7 @@ struct AboutWindow: View {
             }
             .padding(30)
             .frame(width: 320, height: 380)
-            .background(Color.white)
+            .background(Color(NSColor.windowBackgroundColor))
         }
     }
     

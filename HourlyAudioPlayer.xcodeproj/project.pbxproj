@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A1234567890123456789012A /* HourlyAudioPlayerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789012B /* HourlyAudioPlayerApp.swift */; };
 		A1234567890123456789012C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789012D /* ContentView.swift */; };
+		A1234567890123456789012G /* ThemeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789012H /* ThemeManager.swift */; };
 		A1234567890123456789012E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789012F /* Assets.xcassets */; };
 		A1234567890123456789013A /* HourlyTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013B /* HourlyTimer.swift */; };
 		A1234567890123456789013C /* AudioManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013D /* AudioManager.swift */; };
@@ -22,6 +23,7 @@
 /* Begin PBXFileReference section */
 		A1234567890123456789012B /* HourlyAudioPlayerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = src/HourlyAudioPlayerApp.swift; sourceTree = "<group>"; };
 		A1234567890123456789012D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = src/ContentView.swift; sourceTree = "<group>"; };
+		A1234567890123456789012H /* ThemeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = src/ThemeManager.swift; sourceTree = "<group>"; };
 		A1234567890123456789012F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = src/Assets.xcassets; sourceTree = "<group>"; };
 		A1234567890123456789013B /* HourlyTimer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = src/HourlyTimer.swift; sourceTree = "<group>"; };
 		A1234567890123456789013D /* AudioManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = src/AudioManager.swift; sourceTree = "<group>"; };
@@ -57,6 +59,7 @@
 			children = (
 				A1234567890123456789012B /* HourlyAudioPlayerApp.swift */,
 				A1234567890123456789012D /* ContentView.swift */,
+				A1234567890123456789012H /* ThemeManager.swift */,
 				A1234567890123456789013B /* HourlyTimer.swift */,
 				A1234567890123456789013D /* AudioManager.swift */,
 				A1234567890123456789013F /* AudioFileManager.swift */,
@@ -147,6 +150,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1234567890123456789012C /* ContentView.swift in Sources */,
+				A1234567890123456789012G /* ThemeManager.swift in Sources */,
 				A1234567890123456789013A /* HourlyTimer.swift in Sources */,
 				A1234567890123456789013C /* AudioManager.swift in Sources */,
 				A1234567890123456789013E /* AudioFileManager.swift in Sources */,
@@ -287,7 +291,7 @@
 				CODE_SIGN_ENTITLEMENTS = src/HourlyAudioPlayer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 88;
+				CURRENT_PROJECT_VERSION = 113;
 				DEVELOPMENT_ASSET_PATHS = "\"src/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -315,7 +319,7 @@
 				CODE_SIGN_ENTITLEMENTS = src/HourlyAudioPlayer.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 88;
+				CURRENT_PROJECT_VERSION = 113;
 				DEVELOPMENT_ASSET_PATHS = "\"src/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;

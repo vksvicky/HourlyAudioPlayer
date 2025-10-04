@@ -5,6 +5,7 @@ struct MenuBarView: View {
     private let logger = Logger(subsystem: "com.example.HourlyAudioPlayer", category: "MenuBarView")
     @StateObject private var audioFileManager = AudioFileManager.shared
     @StateObject private var hourlyTimer = HourlyTimer.shared
+    @StateObject private var themeManager = ThemeManager.shared
     @State private var showingSettings = false
     @State private var showingAbout = false
     @State private var currentTime = Date()
@@ -132,7 +133,7 @@ struct MenuBarView: View {
         }
         .padding()
         .frame(width: 300)
-        .background(Color.white)
+        .background(Color(NSColor.windowBackgroundColor))
         .sheet(isPresented: $showingSettings) {
             ContentView()
         }

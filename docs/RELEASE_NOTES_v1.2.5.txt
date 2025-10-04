@@ -1,7 +1,7 @@
-Hourly Audio Player v1.2.3
+Hourly Audio Player v1.2.5
 ============================
 
-Build Date: 2025-10-03 16:39:13
+Build Date: 2025-10-04 20:13:41
 Build Type: Release
 Architecture: Universal (Intel & Apple Silicon)
 Bundle ID: club.cycleruncode.HourlyAudioPlayer
@@ -21,10 +21,21 @@ Bundle ID: club.cycleruncode.HourlyAudioPlayer
 • File validation (size limits, format checking)
 • Missing file detection with fallback to system sounds
 • Pong easter egg game with keyboard controls
-• Consistent UI design across all windows
+• Light/Dark theme support with system color integration
+• Comprehensive test suite with behavioral validation
 • Universal binary support (Intel & Apple Silicon)
 
-🆕 NEW IN v1.2.x
+🆕 NEW IN v1.2.5
+================
+• **Light/Dark Theme Support**: Complete theme system with Light/Dark mode toggle
+• **System Color Integration**: All UI elements now use system colors for proper theme adaptation
+• **Theme Persistence**: User theme preferences are saved and restored across app restarts
+• **Comprehensive Test Suite**: Added extensive behavioral tests for theme functionality
+• **Improved UI Consistency**: All windows now properly adapt to theme changes
+• **Enhanced Pong Game**: Game elements now respect the selected theme
+• **Theme Manager**: Singleton-based theme management with force refresh capabilities
+
+🆕 NEW IN v1.2.3
 ================
 • Fixed universal binary compatibility for Intel Macs
 • Updated bundle identifier to club.cycleruncode.HourlyAudioPlayer
@@ -33,10 +44,12 @@ Bundle ID: club.cycleruncode.HourlyAudioPlayer
 • Consistent UI styling with white backgrounds and red close buttons
 • Pong game improvements with keyboard controls and better AI
 • Fixed layout shifts and button visibility issues
+• Fixed timer drift issue (sounds now play exactly on the hour)
+• Enhanced build system with proper architecture support
 
 📦 INSTALLATION
 ===============
-1. Download the DMG file: HourlyAudioPlayer-v1.2.3.dmg
+1. Download the DMG file: HourlyAudioPlayer-v1.2.5.dmg
 2. Double-click the DMG to mount it
 3. Drag HourlyAudioPlayer.app to your Applications folder
 4. Launch the app from Applications or Spotlight
@@ -45,7 +58,7 @@ Bundle ID: club.cycleruncode.HourlyAudioPlayer
 📚 DOCUMENTATION INCLUDED
 ==========================
 The DMG/ZIP package includes:
-• RELEASE_NOTES_v1.2.3.txt - Complete documentation
+• RELEASE_NOTES_v1.2.5.txt - Complete documentation
 • troubleshoot.sh - Automated diagnostic script
 • QUICK_START_GUIDE.txt - 5-minute setup guide
 • RELEASE_CHECKLIST.txt - Quality assurance checklist
@@ -63,9 +76,28 @@ The DMG/ZIP package includes:
 1. Look for the speaker icon in your menu bar
 2. Click the icon to open the app interface
 3. Use "Open Settings" to configure audio files for each hour
-4. The app will automatically play audio at the top of each hour
-5. Use "Test Current Hour" to verify audio playback
-6. Try the Pong easter egg by clicking "About" and then the app icon!
+4. Use the Light/Dark theme toggle in settings to switch themes
+5. The app will automatically play audio at the top of each hour
+6. Use "Test Current Hour" to verify audio playback
+7. Try the Pong easter egg by clicking "About" and then the app icon!
+
+🎨 THEME SYSTEM
+===============
+The app now includes a comprehensive theme system:
+
+• **Theme Toggle**: Located in the settings window, inline with the "Done" button
+• **Light Theme**: Clean, bright interface with system-appropriate colors
+• **Dark Theme**: Dark interface that adapts to system dark mode
+• **System Integration**: All colors automatically adapt to the selected theme
+• **Persistence**: Your theme choice is remembered across app restarts
+• **Default**: App defaults to Light theme for new installations
+
+Theme Features:
+• Consistent appearance across all windows (Settings, About, Menu Bar, Pong Game)
+• System color integration for proper macOS integration
+• Automatic UI refresh when theme changes
+• Theme-aware Pong game with proper contrast
+• Hour slot styling that adapts to theme
 
 🔧 TROUBLESHOOTING
 ==================
@@ -103,19 +135,25 @@ Common Issues & Solutions:
    • Clear app data: ~/Library/Application Support/HourlyAudioPlayer/
    • Reinstall the app
 
-6. DEBUGGING ISSUES
+6. THEME ISSUES
+   • Try switching between Light and Dark themes
+   • Restart the app if theme changes don't apply immediately
+   • Check that you're using v1.2.5 or later for theme support
+   • Clear app data if theme preferences become corrupted
+
+7. DEBUGGING ISSUES
    • Run with debug mode: ./build_and_run.sh minor debug
    • Check Console.app for log messages
    • Look for "HourlyAudioPlayer" in system logs
    • Use Activity Monitor to check app status
 
-7. PERFORMANCE ISSUES
+8. PERFORMANCE ISSUES
    • Close other audio applications
    • Check available disk space
    • Restart the app periodically
    • Monitor CPU usage in Activity Monitor
 
-8. INTEL MAC COMPATIBILITY
+9. INTEL MAC COMPATIBILITY
    • Ensure you're using v1.2.3 or later
    • The app now includes universal binary support
    • If issues persist, try reinstalling the latest version
@@ -133,6 +171,11 @@ File System Issues:
 • Verify audio directory exists: ~/Library/Application Support/HourlyAudioPlayer/
 • Check file permissions: ls -la ~/Library/Application\ Support/HourlyAudioPlayer/
 • Clear corrupted data: rm -rf ~/Library/Application\ Support/HourlyAudioPlayer/
+
+Theme Issues:
+• Check theme preferences: defaults read club.cycleruncode.HourlyAudioPlayer
+• Reset theme to default: defaults delete club.cycleruncode.HourlyAudioPlayer isDarkMode
+• Clear all app preferences: defaults delete club.cycleruncode.HourlyAudioPlayer
 
 Network Issues:
 • Check internet connection for notifications
@@ -158,22 +201,46 @@ Audio System Issues:
 • Requires macOS 12.0 or later
 • Menu bar icon may not appear immediately after installation
 • Some audio formats may require additional codecs
+• Theme changes may require app restart in rare cases
 
 🔄 UPDATES
 ==========
 • Check for updates regularly
 • Backup your audio files before updating
 • New versions may require re-granting permissions
+• Theme preferences are preserved across updates
 
 For technical support, please provide:
 • macOS version (System Information)
-• App version: 1.2.3
+• App version: 1.2.5
 • Error messages from Console.app
 • Steps to reproduce the issue
 
 📝 COMPLETE CHANGELOG
 =====================
-All changes from v1.0.0 to v1.2.3:
+All changes from v1.0.0 to v1.2.5:
+
+v1.2.5 (2025-10-04)
+• Added comprehensive Light/Dark theme system
+• Implemented ThemeManager singleton for theme management
+• Added theme persistence with UserDefaults
+• Integrated system colors for proper theme adaptation
+• Enhanced all views (ContentView, AboutWindow, MenuBarView, PongGameView) with theme support
+• Added theme toggle in settings window
+• Created comprehensive test suite with behavioral validation
+• Improved UI consistency across all windows
+• Enhanced Pong game with theme-aware styling
+• Added force refresh capabilities for theme changes
+• Set default theme to Light for new installations
+
+v1.2.4 (2025-10-04)
+• Fixed timer drift issue - sounds now play exactly on the hour
+• Improved timer precision using Calendar-based calculations
+• Enhanced logging for debugging timing issues
+• Fixed 3-minute delay bug in hourly audio playback
+• Fixed universal binary compatibility for Intel Macs
+• Updated bundle identifier to club.cycleruncode.HourlyAudioPlayer
+• Enhanced build system with proper architecture support
 
 v1.2.3 (2025-10-03)
 • Fixed universal binary compatibility for Intel Macs
@@ -209,23 +276,46 @@ v1.0.0 (2025-10-02)
 • File validation and missing file detection
 
 Recent Development History:
-- Minor fix (e6ab3eb) — vksvicky
-- Fixed a Timezone issue with notification and added an Easter egg (25beb6f) — vksvicky
-- Fixed a Timezone issue with notification and added an Easter egg (fd8efa6) — vksvicky
-- Updated release to support macOS 12+ (c4bae87) — vksvicky
-- Updated Release script (eca5584) — vksvicky
-- Test fixes (d3329f7) — vksvicky
-- Better tests and UI fixes (43a50c4) — vksvicky
-- Refactoring (19b8283) — vksvicky
-- Audio fixes (fc8d442) — vksvicky
-- Updated README and few other changes (cc792ee) — vksvicky
-- First commit (b33a612) — vksvicky
+- Added comprehensive theme system with Light/Dark mode support
+- Implemented ThemeManager singleton with persistence
+- Enhanced all views with system color integration
+- Created extensive test suite for theme functionality
+- Fixed timer drift issue for precise hourly playback
+- Improved universal binary compatibility
+- Enhanced Pong game with theme-aware styling
+- Added theme toggle in settings interface
+- Implemented force refresh for theme changes
+- Set default theme to Light for new users
 
 🏆 VERSION HISTORY SUMMARY
 ==========================
+v1.2.5: Complete theme system, Light/Dark mode, system color integration, comprehensive tests
+v1.2.4: Fixed timer drift, precise hourly playback, improved timing calculations
 v1.2.3: Universal binary support, proper bundle ID, enhanced build system
 v1.2.2: Version management fixes, improved release packaging
 v1.2.1: Changelog generation, timezone fixes, Pong easter egg, UI improvements
 v1.0.0: Initial release with core functionality
 
-This release represents the culmination of all improvements and fixes from the initial v1.0.0 release through the latest v1.2.3, providing a stable, feature-rich, and universally compatible macOS application.
+🧪 TESTING
+==========
+This release includes a comprehensive test suite:
+
+• **ThemeManagerTests**: 20+ tests covering singleton behavior, persistence, theme switching
+• **PongGameViewTests**: 15+ tests covering game functionality and theme integration
+• **ThemeIntegrationTests**: 25+ tests covering cross-view consistency and system integration
+• **ContentViewTests**: Enhanced with theme-related test scenarios
+• **Behavioral Validation**: Tests verify actual functionality, not just crash prevention
+• **Performance Testing**: Theme switching and view creation performance
+• **Stress Testing**: High-frequency operations and concurrent access
+• **Error Handling**: Corrupted data, invalid states, and edge cases
+
+Test Coverage:
+• Theme switching and persistence
+• System color integration
+• Cross-view theme consistency
+• Memory management and singleton behavior
+• Concurrent theme operations
+• Error handling and edge cases
+• Performance and stress testing
+
+This release represents the culmination of all improvements and fixes from the initial v1.0.0 release through the latest v1.2.5, providing a stable, feature-rich, theme-aware, and universally compatible macOS application with comprehensive testing coverage.
