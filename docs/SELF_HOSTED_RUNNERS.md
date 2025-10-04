@@ -4,6 +4,8 @@
 
 Since GitHub Actions no longer provides macOS 12 (Monterey) runners, you need to set up self-hosted runners to test your app on macOS 12, which is the minimum supported version.
 
+**Note**: The macOS 12 job is currently disabled in the workflow (`if: false`) to prevent hanging when no self-hosted runners are available. To enable it, set up self-hosted runners and remove the `if: false` condition.
+
 ## Setting Up Self-Hosted macOS 12 Runners
 
 ### Prerequisites
