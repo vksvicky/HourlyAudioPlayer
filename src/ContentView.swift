@@ -49,11 +49,10 @@ struct ContentView: View {
                 Image(systemName: themeManager.themeIcon)
                     .foregroundColor(.secondary)
                     .frame(width: 16, height: 16)
-                
+
                 Text("Theme:")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                
                 Picker("Theme", selection: $themeManager.isDarkMode) {
                     Text("Light").tag(false)
                     Text("Dark").tag(true)
@@ -102,8 +101,8 @@ struct ContentView: View {
 
 struct HourSlotView: View {
     let hour: Int
-    @StateObject private var audioFileManager = AudioFileManager.shared
-    @StateObject private var themeManager = ThemeManager.shared
+    @ObservedObject private var audioFileManager = AudioFileManager.shared
+    @ObservedObject private var themeManager = ThemeManager.shared
 
     var body: some View {
         VStack(spacing: 8) {
@@ -113,7 +112,6 @@ struct HourSlotView: View {
 
             let displayName = audioFileManager.getAudioDisplayName(for: hour)
             let hasSpecificAudio = audioFileManager.audioFiles[hour] != nil
-            
             VStack(spacing: 4) {
                 Text(displayName)
                     .font(.caption)

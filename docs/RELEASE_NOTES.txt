@@ -1,0 +1,407 @@
+Hourly Audio Player - Complete Release Notes
+============================================
+
+This document contains the complete release history and notes for all versions of Hourly Audio Player.
+
+================================================================================
+v1.2.6 - 2025-10-05 - CRITICAL BUG FIX RELEASE
+================================================================================
+
+Build Date: 2025-10-05 10:15:00
+Build Type: Release
+Architecture: Universal (Intel & Apple Silicon)
+Bundle ID: club.cycleruncode.HourlyAudioPlayer
+
+🆕 NEW IN v1.2.6
+================
+• **Critical Bug Fix**: Fixed audio file selection bug where wrong files were played
+• **Theme Integration Fix**: Resolved issue where @StateObject was creating separate instances
+• **Audio File Consistency**: All hour slots now properly share the same AudioFileManager instance
+• **Improved Reliability**: Audio files now play correctly for their assigned hours
+• **Enhanced Stability**: Fixed SwiftUI view lifecycle issues with singleton managers
+
+🐛 BUG FIXES
+============
+• **Audio File Selection Bug**: Fixed critical issue where selecting a file for hour 2 would play the file from hour 1
+• **Theme Manager Integration**: Fixed @StateObject vs @ObservedObject issue in HourSlotView
+• **Singleton Pattern**: Ensured all hour slots use the same shared AudioFileManager instance
+• **View Lifecycle**: Improved SwiftUI view management for better consistency
+
+================================================================================
+v1.2.5 - 2025-10-04 - THEME SYSTEM RELEASE
+================================================================================
+
+Build Date: 2025-10-04 20:13:41
+Build Type: Release
+Architecture: Universal (Intel & Apple Silicon)
+Bundle ID: club.cycleruncode.HourlyAudioPlayer
+
+🆕 NEW IN v1.2.5
+================
+• **Light/Dark Theme Support**: Complete theme system with Light/Dark mode toggle
+• **System Color Integration**: All UI elements now use system colors for proper theme adaptation
+• **Theme Persistence**: User theme preferences are saved and restored across app restarts
+• **Comprehensive Test Suite**: Added extensive behavioral tests for theme functionality
+• **Improved UI Consistency**: All windows now properly adapt to theme changes
+• **Enhanced Pong Game**: Game elements now respect the selected theme
+• **Theme Manager**: Singleton-based theme management with force refresh capabilities
+
+🎨 THEME SYSTEM
+===============
+The app now includes a comprehensive theme system:
+
+• **Theme Toggle**: Located in the settings window, inline with the "Done" button
+• **Light Theme**: Clean, bright interface with system-appropriate colors
+• **Dark Theme**: Dark interface that adapts to system dark mode
+• **System Integration**: All colors automatically adapt to the selected theme
+• **Persistence**: Your theme choice is remembered across app restarts
+• **Default**: App defaults to Light theme for new installations
+
+Theme Features:
+• Consistent appearance across all windows (Settings, About, Menu Bar, Pong Game)
+• System color integration for proper macOS integration
+• Automatic UI refresh when theme changes
+• Theme-aware Pong game with proper contrast
+• Hour slot styling that adapts to theme
+
+================================================================================
+v1.2.4 - 2025-10-04 - TIMING FIX RELEASE
+================================================================================
+
+🆕 NEW IN v1.2.4
+================
+• Fixed timer drift issue - sounds now play exactly on the hour
+• Improved timer precision using Calendar-based calculations
+• Enhanced logging for debugging timing issues
+• Fixed 3-minute delay bug in hourly audio playback
+• Fixed universal binary compatibility for Intel Macs
+• Updated bundle identifier to club.cycleruncode.HourlyAudioPlayer
+• Enhanced build system with proper architecture support
+
+================================================================================
+v1.2.3 - 2025-10-03 - UNIVERSAL BINARY RELEASE
+================================================================================
+
+🆕 NEW IN v1.2.3
+================
+• Fixed universal binary compatibility for Intel Macs
+• Updated bundle identifier to club.cycleruncode.HourlyAudioPlayer
+• Enhanced build system with proper architecture support
+• Improved release notes generation
+
+================================================================================
+v1.2.2 - 2025-10-03 - BUILD SYSTEM RELEASE
+================================================================================
+
+🆕 NEW IN v1.2.2
+================
+• Fixed version management in build system
+• Improved changelog generation from git commits
+• Enhanced release packaging
+
+================================================================================
+v1.2.1 - 2025-10-03 - EASTER EGG RELEASE
+================================================================================
+
+🆕 NEW IN v1.2.1
+================
+• Added comprehensive changelog generation
+• Fixed timezone issues with notifications
+• Added Pong easter egg game
+• Improved UI consistency across all windows
+• Fixed layout shifts and button visibility
+• Enhanced Pong game with keyboard controls and random AI speed
+
+================================================================================
+v1.0.0 - 2025-10-02 - INITIAL RELEASE
+================================================================================
+
+🎵 FEATURES
+===========
+• Menu bar app with speaker icon
+• 24-hour audio file configuration (0:00 - 23:00)
+• Automatic hourly audio playback
+• Support for multiple audio formats (MP3, WAV, M4A, AIFF, AAC, FLAC, OGG)
+• Smart filename-based hour detection (e.g., "12_midday.mp3" → 12:00)
+• User notifications for audio playback
+• Manual testing functionality
+• Persistent audio file storage
+• Real-time clock display
+• Debug mode for development testing
+• File validation (size limits, format checking)
+• Missing file detection with fallback to system sounds
+• Comprehensive test suite
+• Build and release scripts
+• Documentation and user guides
+
+📦 INSTALLATION
+===============
+1. Download the DMG file: HourlyAudioPlayer-v[VERSION].dmg
+2. Double-click the DMG to mount it
+3. Drag HourlyAudioPlayer.app to your Applications folder
+4. Launch the app from Applications or Spotlight
+5. Grant necessary permissions when prompted
+
+📚 DOCUMENTATION INCLUDED
+==========================
+The DMG/ZIP package includes:
+• RELEASE_NOTES.txt - Complete documentation (this file)
+• troubleshoot.sh - Automated diagnostic script
+• QUICK_START_GUIDE.txt - 5-minute setup guide
+• RELEASE_CHECKLIST.txt - Quality assurance checklist
+
+💻 SYSTEM REQUIREMENTS
+======================
+• macOS 12.0 or later
+• Intel or Apple Silicon processor
+• Audio files in supported formats
+• Microphone/audio output device
+• Internet connection (for notifications)
+
+🎯 USAGE GUIDE
+==============
+1. Look for the speaker icon in your menu bar
+2. Click the icon to open the app interface
+3. Use "Open Settings" to configure audio files for each hour
+4. Use the Light/Dark theme toggle in settings to switch themes (v1.2.5+)
+5. The app will automatically play audio at the top of each hour
+6. Use "Test Current Hour" to verify audio playback
+7. Try the Pong easter egg by clicking "About" and then the app icon! (v1.2.1+)
+
+🔧 TROUBLESHOOTING
+==================
+
+Common Issues & Solutions:
+
+1. APP NOT APPEARING IN MENU BAR
+   • Check System Preferences > Security & Privacy > Privacy > Accessibility
+   • Ensure HourlyAudioPlayer has accessibility permissions
+   • Restart the app or reboot your Mac
+   • Check if the app is running in Activity Monitor
+
+2. AUDIO NOT PLAYING
+   • Verify audio files are assigned to the current hour
+   • Check System Preferences > Sound > Output
+   • Ensure audio files are in supported formats
+   • Use "Test Current Hour" to verify playback
+   • Check Console.app for error messages
+
+3. NOTIFICATIONS NOT WORKING
+   • Go to System Preferences > Notifications & Focus
+   • Find HourlyAudioPlayer and enable notifications
+   • Check "Allow notifications" is turned on
+   • Verify notification permissions in System Preferences
+
+4. AUDIO FILES NOT LOADING
+   • Check file format (MP3, WAV, M4A, AIFF, AAC, FLAC, OGG)
+   • Verify file size is under 2.5MB
+   • Ensure file is not corrupted
+   • Check file permissions (read access required)
+
+5. APP CRASHES OR FREEZES
+   • Check Console.app for crash logs
+   • Restart the app
+   • Clear app data: ~/Library/Application Support/HourlyAudioPlayer/
+   • Reinstall the app
+
+6. THEME ISSUES (v1.2.5+)
+   • Try switching between Light and Dark themes
+   • Restart the app if theme changes don't apply immediately
+   • Check that you're using v1.2.5 or later for theme support
+   • Clear app data if theme preferences become corrupted
+
+7. DEBUGGING ISSUES
+   • Run with debug mode: ./build_and_run.sh minor debug
+   • Check Console.app for log messages
+   • Look for "HourlyAudioPlayer" in system logs
+   • Use Activity Monitor to check app status
+
+8. PERFORMANCE ISSUES
+   • Close other audio applications
+   • Check available disk space
+   • Restart the app periodically
+   • Monitor CPU usage in Activity Monitor
+
+9. INTEL MAC COMPATIBILITY
+   • Ensure you're using v1.2.3 or later
+   • The app now includes universal binary support
+   • If issues persist, try reinstalling the latest version
+
+10. AUDIO FILE SELECTION ISSUES (v1.2.6+)
+    • If you experience wrong audio files playing, update to v1.2.6
+    • This version fixes the critical audio file selection bug
+    • Clear app data if issues persist: ~/Library/Application Support/HourlyAudioPlayer/
+    • Reconfigure your audio files after updating
+
+🔍 ADVANCED TROUBLESHOOTING
+===========================
+
+Log Analysis:
+• Open Console.app (Applications > Utilities)
+• Search for "HourlyAudioPlayer"
+• Look for error messages or warnings
+• Check system.log for related entries
+
+File System Issues:
+• Verify audio directory exists: ~/Library/Application Support/HourlyAudioPlayer/
+• Check file permissions: ls -la ~/Library/Application\ Support/HourlyAudioPlayer/
+• Clear corrupted data: rm -rf ~/Library/Application\ Support/HourlyAudioPlayer/
+
+Theme Issues (v1.2.5+):
+• Check theme preferences: defaults read club.cycleruncode.HourlyAudioPlayer
+• Reset theme to default: defaults delete club.cycleruncode.HourlyAudioPlayer isDarkMode
+• Clear all app preferences: defaults delete club.cycleruncode.HourlyAudioPlayer
+
+Network Issues:
+• Check internet connection for notifications
+• Verify firewall settings
+• Test with different network connections
+
+Audio System Issues:
+• Reset audio system: sudo killall coreaudiod
+• Check audio drivers and hardware
+• Test with different audio output devices
+
+🆘 SUPPORT & FEEDBACK
+=====================
+• Check the project repository for updates
+• Report issues with detailed logs
+• Include system information (macOS version, hardware)
+• Provide steps to reproduce problems
+
+📋 KNOWN LIMITATIONS
+====================
+• Maximum file size: 2.5MB per audio file
+• Supported formats: MP3, WAV, M4A, AIFF, AAC, FLAC, OGG
+• Requires macOS 12.0 or later
+• Menu bar icon may not appear immediately after installation
+• Some audio formats may require additional codecs
+• Theme changes may require app restart in rare cases
+
+🔄 UPDATES
+==========
+• Check for updates regularly
+• Backup your audio files before updating
+• New versions may require re-granting permissions
+• Theme preferences are preserved across updates
+
+For technical support, please provide:
+• macOS version (System Information)
+• App version: [Current Version]
+• Error messages from Console.app
+• Steps to reproduce the issue
+
+🧪 TESTING
+==========
+This release includes a comprehensive test suite:
+
+• **ThemeManagerTests**: 20+ tests covering singleton behavior, persistence, theme switching
+• **PongGameViewTests**: 15+ tests covering game functionality and theme integration
+• **ThemeIntegrationTests**: 25+ tests covering cross-view consistency and system integration
+• **ContentViewTests**: Enhanced with theme-related test scenarios
+• **Behavioral Validation**: Tests verify actual functionality, not just crash prevention
+• **Performance Testing**: Theme switching and view creation performance
+• **Stress Testing**: High-frequency operations and concurrent access
+• **Error Handling**: Corrupted data, invalid states, and edge cases
+
+Test Coverage:
+• Theme switching and persistence (v1.2.5+)
+• System color integration (v1.2.5+)
+• Cross-view theme consistency (v1.2.5+)
+• Memory management and singleton behavior
+• Concurrent theme operations (v1.2.5+)
+• Error handling and edge cases
+• Performance and stress testing
+• Audio file selection and consistency (v1.2.6+)
+
+🏆 VERSION HISTORY SUMMARY
+==========================
+v1.2.6: **CRITICAL BUG FIX** - Fixed audio file selection bug, improved singleton pattern
+v1.2.5: Complete theme system, Light/Dark mode, system color integration, comprehensive tests
+v1.2.4: Fixed timer drift, precise hourly playback, improved timing calculations
+v1.2.3: Universal binary support, proper bundle ID, enhanced build system
+v1.2.2: Version management fixes, improved release packaging
+v1.2.1: Changelog generation, timezone fixes, Pong easter egg, UI improvements
+v1.0.0: Initial release with core functionality
+
+📝 COMPLETE CHANGELOG
+=====================
+All changes from v1.0.0 to v1.2.6:
+
+v1.2.6 (2025-10-05)
+• **CRITICAL FIX**: Fixed audio file selection bug where wrong files were played
+• Fixed @StateObject vs @ObservedObject issue in HourSlotView
+• Ensured all hour slots use the same shared AudioFileManager instance
+• Improved SwiftUI view lifecycle management
+• Enhanced audio file consistency and reliability
+• Fixed theme integration issues with singleton managers
+
+v1.2.5 (2025-10-04)
+• Added comprehensive Light/Dark theme system
+• Implemented ThemeManager singleton for theme management
+• Added theme persistence with UserDefaults
+• Integrated system colors for proper theme adaptation
+• Enhanced all views (ContentView, AboutWindow, MenuBarView, PongGameView) with theme support
+• Added theme toggle in settings window
+• Created comprehensive test suite with behavioral validation
+• Improved UI consistency across all windows
+• Enhanced Pong game with theme-aware styling
+• Added force refresh capabilities for theme changes
+• Set default theme to Light for new installations
+
+v1.2.4 (2025-10-04)
+• Fixed timer drift issue - sounds now play exactly on the hour
+• Improved timer precision using Calendar-based calculations
+• Enhanced logging for debugging timing issues
+• Fixed 3-minute delay bug in hourly audio playback
+• Fixed universal binary compatibility for Intel Macs
+• Updated bundle identifier to club.cycleruncode.HourlyAudioPlayer
+• Enhanced build system with proper architecture support
+
+v1.2.3 (2025-10-03)
+• Fixed universal binary compatibility for Intel Macs
+• Updated bundle identifier to club.cycleruncode.HourlyAudioPlayer
+• Enhanced build system with proper architecture support
+• Improved release notes generation
+
+v1.2.2 (2025-10-03)
+• Fixed version management in build system
+• Improved changelog generation from git commits
+• Enhanced release packaging
+
+v1.2.1 (2025-10-03)
+• Added comprehensive changelog generation
+• Fixed timezone issues with notifications
+• Added Pong easter egg game
+• Improved UI consistency across all windows
+• Fixed layout shifts and button visibility
+• Enhanced Pong game with keyboard controls and random AI speed
+
+v1.0.0 (2025-10-02)
+• Initial release
+• Menu bar app with speaker icon
+• 24-hour audio file configuration
+• Automatic hourly audio playback
+• Support for multiple audio formats
+• Smart filename-based hour detection
+• User notifications for audio playback
+• Manual testing functionality
+• Persistent audio file storage
+• Real-time clock display
+• Debug mode for development testing
+• File validation and missing file detection
+
+Recent Development History:
+- **v1.2.6**: Fixed critical audio file selection bug, improved singleton pattern usage
+- Added comprehensive theme system with Light/Dark mode support
+- Implemented ThemeManager singleton with persistence
+- Enhanced all views with system color integration
+- Created extensive test suite for theme functionality
+- Fixed timer drift issue for precise hourly playback
+- Improved universal binary compatibility
+- Enhanced Pong game with theme-aware styling
+- Added theme toggle in settings interface
+- Implemented force refresh for theme changes
+- Set default theme to Light for new users
+
+This release represents the culmination of all improvements and fixes from the initial v1.0.0 release through the latest v1.2.6, providing a stable, feature-rich, theme-aware, and universally compatible macOS application with comprehensive testing coverage and critical bug fixes.
