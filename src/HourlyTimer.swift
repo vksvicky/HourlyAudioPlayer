@@ -11,10 +11,17 @@ class HourlyTimer: ObservableObject {
     private let audioFileManager = AudioFileManager.shared
     private let audioManager = AudioManager.shared
     private var lastPlayedHour: Int = -1
+    private var lastKnownTime: Date = Date()
     private let logger = Logger(subsystem: "com.example.HourlyAudioPlayer", category: "HourlyTimer")
 
     private init() {
         requestNotificationPermission()
+        setupSleepWakeNotifications()
+    }
+
+    deinit {
+        // Clean up notification observers
+        NSWorkspace.shared.notificationCenter.removeObserver(self)
     }
 
     func start() {
@@ -76,8 +83,20 @@ class HourlyTimer: ObservableObject {
         logger.info("🕐 Timezone offset: \(TimeZone.current.secondsFromGMT()) seconds")
 
         // Check if we're playing at the right time (should be close to minute 0)
+        // Only play audio if we're within the first 2 minutes of the hour
         if currentMinute > 2 {
             logger.warning("⚠️ Audio playing \(currentMinute) minutes past the hour - timing may be off")
+            logger.info("🚫 Skipping audio playback - too far past the hour (likely from sleep/wake)")
+            return
+        }
+
+        // Check for potential sleep/wake scenario
+        let timeSinceLastKnown = now.timeIntervalSince(lastKnownTime)
+        if timeSinceLastKnown > 3600 { // More than 1 hour has passed
+            logger.info("💤 Detected potential sleep/wake scenario - \(Int(timeSinceLastKnown/3600)) hours have passed")
+            logger.info("🚫 Skipping audio playback to avoid playing missed hours")
+            lastKnownTime = now
+            return
         }
 
         // Avoid playing the same hour multiple times
@@ -87,6 +106,7 @@ class HourlyTimer: ObservableObject {
         }
 
         lastPlayedHour = currentHour
+        lastKnownTime = now
 
         if let audioFile = audioFileManager.getAudioFile(for: currentHour) {
             let success = audioManager.playAudio(from: audioFile)
@@ -141,6 +161,43 @@ class HourlyTimer: ObservableObject {
             if let error = error {
                 self.logger.error("Notification permission error: \(error.localizedDescription)")
             }
+        }
+    }
+
+    private func setupSleepWakeNotifications() {
+        // Listen for system sleep and wake notifications
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self,
+            selector: #selector(systemWillSleep),
+            name: NSWorkspace.willSleepNotification,
+            object: nil as Any?
+        )
+
+        NSWorkspace.shared.notificationCenter.addObserver(
+            self,
+            selector: #selector(systemDidWake),
+            name: NSWorkspace.didWakeNotification,
+            object: nil as Any?
+        )
+        
+        logger.info("💤 Sleep/wake notifications registered")
+    }
+
+    @objc private func systemWillSleep() {
+        logger.info("💤 System is going to sleep")
+        // Store the current time to detect sleep duration later
+        lastKnownTime = Date()
+    }
+
+    @objc private func systemDidWake() {
+        logger.info("🌅 System woke up from sleep")
+        // Update the last known time and reschedule timer
+        lastKnownTime = Date()
+
+        // Reschedule the timer to ensure it's still accurate after wake
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.logger.info("🔄 Rescheduling timer after wake")
+            self.start()
         }
     }
 

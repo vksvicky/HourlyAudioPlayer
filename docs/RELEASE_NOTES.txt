@@ -4,6 +4,37 @@ Hourly Audio Player - Complete Release Notes
 This document contains the complete release history and notes for all versions of Hourly Audio Player.
 
 ================================================================================
+v1.2.7 - 2025-10-08 - SLEEP/WAKE FIX RELEASE
+================================================================================
+
+Build Date: 2025-10-08 12:30:00
+Build Type: Release
+Architecture: Universal (Intel & Apple Silicon)
+Bundle ID: club.cycleruncode.HourlyAudioPlayer
+
+🆕 NEW IN v1.2.7
+================
+• **Sleep/Wake Fix**: Fixed audio playback issue after Mac wakes from sleep
+• **Smart Time Validation**: Audio only plays within the first 2 minutes of each hour
+• **Automatic Timer Rescheduling**: Timer automatically recalculates after system wake
+• **Sleep Detection**: Added proper sleep/wake notification handling
+• **Enhanced Reliability**: Prevents playing missed audio from previous hours
+
+🐛 BUG FIXES
+============
+• **Sleep/Wake Audio Issue**: Fixed bug where wrong audio files played after Mac woke from sleep
+• **Timer Drift Prevention**: Improved timer accuracy after system sleep/wake cycles
+• **Missed Audio Prevention**: Audio from previous hours no longer plays incorrectly
+• **Time Validation**: Added checks to ensure audio plays only at correct times
+
+🔧 TECHNICAL IMPROVEMENTS
+==========================
+• **NSWorkspace Integration**: Added sleep/wake notification observers
+• **Time Tracking**: Implemented lastKnownTime property for sleep detection
+• **Memory Management**: Proper cleanup of notification observers
+• **Test Coverage**: Added comprehensive SleepWakeTests.swift
+
+================================================================================
 v1.2.6 - 2025-10-05 - CRITICAL BUG FIX RELEASE
 ================================================================================
 
