@@ -27,11 +27,13 @@
 		B000000000000000000002 /* AboutSessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000012 /* AboutSessionState.swift */; };
 		B000000000000000000003 /* LaunchScheduleSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000013 /* LaunchScheduleSettings.swift */; };
 		B000000000000000000004 /* LaunchScheduleIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000014 /* LaunchScheduleIcons.swift */; };
+		B000000000000000000005 /* HourClockColour.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000015 /* HourClockColour.swift */; };
 		B000000000000000000101 /* PongGameControlStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000111 /* PongGameControlStateTests.swift */; };
 		B000000000000000000102 /* AboutSessionStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000112 /* AboutSessionStateTests.swift */; };
 		B000000000000000000103 /* HourScheduleManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000113 /* HourScheduleManagerTests.swift */; };
 		B000000000000000000104 /* HourVolumeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000114 /* HourVolumeTests.swift */; };
 		B000000000000000000105 /* LaunchScheduleSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000115 /* LaunchScheduleSettingsTests.swift */; };
+		B000000000000000000106 /* HourClockColourTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000116 /* HourClockColourTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,12 +61,14 @@
 		B000000000000000000012 /* AboutSessionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSessionState.swift; sourceTree = "<group>"; };
 		B000000000000000000013 /* LaunchScheduleSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScheduleSettings.swift; sourceTree = "<group>"; };
 		B000000000000000000014 /* LaunchScheduleIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScheduleIcons.swift; sourceTree = "<group>"; };
+		B000000000000000000015 /* HourClockColour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourClockColour.swift; sourceTree = "<group>"; };
 		B000000000000000000021 /* HourlyAudioPlayerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HourlyAudioPlayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B000000000000000000111 /* PongGameControlStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PongGameControlStateTests.swift; sourceTree = "<group>"; };
 		B000000000000000000112 /* AboutSessionStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSessionStateTests.swift; sourceTree = "<group>"; };
 		B000000000000000000113 /* HourScheduleManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourScheduleManagerTests.swift; sourceTree = "<group>"; };
 		B000000000000000000114 /* HourVolumeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourVolumeTests.swift; sourceTree = "<group>"; };
 		B000000000000000000115 /* LaunchScheduleSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScheduleSettingsTests.swift; sourceTree = "<group>"; };
+		B000000000000000000116 /* HourClockColourTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourClockColourTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -135,6 +139,7 @@
 				B000000000000000000012 /* AboutSessionState.swift */,
 				B000000000000000000013 /* LaunchScheduleSettings.swift */,
 				B000000000000000000014 /* LaunchScheduleIcons.swift */,
+				B000000000000000000015 /* HourClockColour.swift */,
 				A1234567890123456789012F /* Assets.xcassets */,
 				A1234567890123456789072 /* Info.plist */,
 				A1234567890123456789014D /* HourlyAudioPlayer.entitlements */,
@@ -159,6 +164,7 @@
 				B000000000000000000113 /* HourScheduleManagerTests.swift */,
 				B000000000000000000114 /* HourVolumeTests.swift */,
 				B000000000000000000115 /* LaunchScheduleSettingsTests.swift */,
+				B000000000000000000116 /* HourClockColourTests.swift */,
 			);
 			path = test;
 			sourceTree = "<group>";
@@ -308,6 +314,7 @@
 				B000000000000000000002 /* AboutSessionState.swift in Sources */,
 				B000000000000000000003 /* LaunchScheduleSettings.swift in Sources */,
 				B000000000000000000004 /* LaunchScheduleIcons.swift in Sources */,
+				B000000000000000000005 /* HourClockColour.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,6 +327,7 @@
 				B000000000000000000103 /* HourScheduleManagerTests.swift in Sources */,
 				B000000000000000000104 /* HourVolumeTests.swift in Sources */,
 				B000000000000000000105 /* LaunchScheduleSettingsTests.swift in Sources */,
+				B000000000000000000106 /* HourClockColourTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

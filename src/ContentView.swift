@@ -7,6 +7,7 @@ struct ContentView: View {
     @StateObject private var hourlyTimer = HourlyTimer.shared
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var launchSettings = LaunchScheduleSettings.shared
+    @StateObject private var hourColourStore = HourClockColourStore.shared
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -33,6 +34,8 @@ struct ContentView: View {
             }
 
             Divider()
+
+            hourColourSettingsSection
 
             if launchSettings.showLaunchTestControls {
                 Text("Developer: click a hour’s launch icon (folder + file) to open Test launches now.")
@@ -115,8 +118,43 @@ struct ContentView: View {
             .padding(.horizontal)
             .padding(.bottom, 16)
         }
-        .frame(width: 560, height: 680)
+        .frame(width: 560, height: 720)
         .background(Color(NSColor.windowBackgroundColor))
+    }
+
+    private var hourColourSettingsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Toggle("Colour hours by clock", isOn: $hourColourStore.isEnabled)
+                .font(.caption)
+                .help("Grade each hour slot from past → now → future using the system clock.")
+
+            if hourColourStore.isEnabled {
+                HStack(spacing: 16) {
+                    hourColourPicker(label: "Past", colour: $hourColourStore.pastColour)
+                    hourColourPicker(label: "Now", colour: $hourColourStore.currentHourColour)
+                    hourColourPicker(label: "Future", colour: $hourColourStore.futureColour)
+                }
+            }
+        }
+        .padding(.horizontal, 12)
+    }
+
+    private func hourColourPicker(label: String, colour: Binding<HourRGBColour>) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.caption2)
+                .foregroundColor(.secondary)
+            ColorPicker(
+                "",
+                selection: Binding(
+                    get: { colour.wrappedValue.swiftUIColor },
+                    set: { colour.wrappedValue = HourRGBColour(swiftUIColor: $0) }
+                ),
+                supportsOpacity: false
+            )
+            .labelsHidden()
+            .frame(width: 44, height: 28)
+        }
     }
 }
 
@@ -126,6 +164,7 @@ struct HourSlotView: View {
     @ObservedObject private var hourScheduleManager = HourScheduleManager.shared
     @ObservedObject private var themeManager = ThemeManager.shared
     @ObservedObject private var launchSettings = LaunchScheduleSettings.shared
+    @ObservedObject private var hourColourStore = HourClockColourStore.shared
 
     private var hasSpecificAudio: Bool {
         audioFileManager.audioFiles[hour] != nil
@@ -188,11 +227,11 @@ struct HourSlotView: View {
         .padding(.vertical, 8)
         .frame(width: 120, alignment: .top)
         .fixedSize(horizontal: true, vertical: true)
-        .background(themeManager.isDarkMode ? Color.gray.opacity(0.3) : Color.gray.opacity(0.1))
+        .background(slotBackground)
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(themeManager.isDarkMode ? Color.gray.opacity(0.5) : Color.gray.opacity(0.3), lineWidth: 1)
+                .stroke(slotBorderColour, lineWidth: hourColourStore.isCurrentHour(hour) ? 2 : 1)
         )
         .sheet(isPresented: $showingLaunchEditor) {
             LaunchScheduleEditorView(hour: hour)
@@ -216,6 +255,20 @@ struct HourSlotView: View {
                 ? "Click to add apps or files for this hour"
                 : "Manage scheduled launches (\(launchBadgeLabel))"
         )
+    }
+
+    private var slotBackground: Color {
+        if let graded = hourColourStore.colour(forHour: hour) {
+            return graded.swiftUIColor.opacity(themeManager.isDarkMode ? 0.55 : 0.4)
+        }
+        return themeManager.isDarkMode ? Color.gray.opacity(0.3) : Color.gray.opacity(0.1)
+    }
+
+    private var slotBorderColour: Color {
+        if hourColourStore.isCurrentHour(hour) {
+            return Color.accentColor
+        }
+        return themeManager.isDarkMode ? Color.gray.opacity(0.5) : Color.gray.opacity(0.3)
     }
 
     private var launchBadgeLabel: String {
