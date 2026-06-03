@@ -27,39 +27,7 @@ struct MenuBarView: View {
 
                 Button(action: {
                     logger.debug("Close button tapped")
-                    // Try multiple approaches to close the popover
-                    
-                    // Approach 1: Direct popover close
-                    if let appDelegate = NSApp.delegate as? AppDelegate,
-                       let popover = appDelegate.popover {
-                        logger.debug("Closing via direct popover reference")
-                        popover.performClose(nil)
-                        return
-                    }
-                    
-                    // Approach 2: Find popover in windows
-                    for window in NSApp.windows {
-                        if let popover = window as? NSPopover {
-                            logger.debug("Closing popover found in NSApp.windows")
-                            popover.performClose(nil)
-                            return
-                        }
-                    }
-                    
-                    // Approach 3: Close current window
-                    if let currentWindow = NSApp.keyWindow {
-                        logger.debug("Closing current key window")
-                        currentWindow.close()
-                        return
-                    }
-                    
-                    // Approach 4: Use status bar button method
-                    if let appDelegate = NSApp.delegate as? AppDelegate {
-                        logger.debug("Closing via statusBarButtonClicked()")
-                        appDelegate.statusBarButtonClicked()
-                    } else {
-                        logger.error("App delegate not found; cannot close popover")
-                    }
+                    (NSApp.delegate as? AppDelegate)?.closePopover()
                 }, label: {
                     Text("×")
                         .font(.system(size: 18, weight: .medium))

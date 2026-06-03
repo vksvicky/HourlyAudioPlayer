@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct PongGameView: View {
-    @Environment(\.dismiss) private var dismiss
     @StateObject private var themeManager = ThemeManager.shared
     var onBackToAbout: (() -> Void)?
     @State private var ballPosition = CGPoint(x: 160, y: 200)
@@ -10,10 +9,10 @@ struct PongGameView: View {
     @State private var aiPaddleY: CGFloat = 200
     @State private var playerScore = 0
     @State private var aiScore = 0
-    @State private var gameRunning = false
-    @State private var gameOver = false
+    @State private var control = PongGameControlState()
     @State private var winner = ""
     @State private var showInstructions = true
+    @State private var gameTimer: Timer?
     @State private var keyboardMonitor: Any?
     @State private var isUpKeyPressed = false
     @State private var isDownKeyPressed = false
@@ -29,26 +28,16 @@ struct PongGameView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Title and close
-            HStack {
-                Text("Pong")
-                    .font(.title2)
-                    .fontWeight(.bold)
+            Text("Pong")
+                .font(.title2)
+                .fontWeight(.bold)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.top, 6)
 
-                Spacer()
-
-                Button(action: {
-                    dismiss()
-                }, label: {
-                    Text("×")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.red)
-                })
-                .buttonStyle(.plain)
-                .help("Close")
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 6)
+            gameControlBar
+                .padding(.horizontal, 16)
+                .padding(.top, 4)
 
             // Score display
             HStack {
@@ -93,7 +82,7 @@ struct PongGameView: View {
                         .position(x: 20, y: aiPaddleY)
                     
                     // Instructions Overlay
-                    if showInstructions {
+                    if control.showInstructions {
                         VStack(spacing: 12) {
                             Text("🎮 Pong Instructions")
                                 .font(.title3)
@@ -107,7 +96,6 @@ struct PongGameView: View {
                             .font(.body)
 
                             Button("Start Game") {
-                                showInstructions = false
                                 startGame()
                             }
                             .buttonStyle(.borderedProminent)
@@ -120,25 +108,17 @@ struct PongGameView: View {
                     }
 
                     // Game Over Overlay (centered with single action)
-                    if gameOver {
+                    if control.gameOver {
                         VStack(spacing: 16) {
                             Text(winner)
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundColor(Color(NSColor.controlTextColor))
 
-                            Button {
+                            Button("Play Again") {
                                 resetGame()
-                            } label: {
-                                Text("Play Again")
-                                    .foregroundColor(.white)
-                                    .fontWeight(.semibold)
                             }
-                            .buttonStyle(.plain)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 10)
-                            .background(Color.blue)
-                            .cornerRadius(8)
+                            .buttonStyle(.borderedProminent)
                             .controlSize(.large)
                         }
                         .padding(24)
@@ -147,14 +127,19 @@ struct PongGameView: View {
                         .shadow(radius: 10)
                     }
 
-                    // Pause button overlay at bottom (no layout shift)
-                    VStack {
-                        Spacer()
-                        if gameRunning {
-                            Button("Pause") { gameRunning = false }
-                                .buttonStyle(.bordered)
-                                .padding(.bottom, 6)
+                    if control.showsResumeButton {
+                        VStack(spacing: 8) {
+                            Text("Paused")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                            Text("Press Resume or use the buttons above")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
+                        .padding(20)
+                        .background(Color(NSColor.controlBackgroundColor).opacity(0.92))
+                        .cornerRadius(12)
+                        .shadow(radius: 6)
                     }
                 }
                 .frame(width: gameWidth, height: gameHeight - 80)
@@ -170,27 +155,59 @@ struct PongGameView: View {
             setupKeyboardMonitoring()
         }
         .onDisappear {
+            stopGameTimer()
             stopKeyboardMonitoring()
         }
     }
 
+    @ViewBuilder
+    private var gameControlBar: some View {
+        HStack(spacing: 10) {
+            if control.showsPauseOrResumeButton {
+                Button(control.isPaused ? "Resume" : "Pause") {
+                    if control.isPaused {
+                        control.resume()
+                    } else {
+                        control.pause()
+                    }
+                }
+                .buttonStyle(.bordered)
+                .keyboardShortcut(.space, modifiers: [])
+            }
+
+            Button("Back to About") {
+                returnToAbout()
+            }
+            .buttonStyle(.bordered)
+
+            Spacer()
+        }
+    }
+
     private func startGame() {
-        gameRunning = true
-        gameOver = false
-        showInstructions = false
+        stopGameTimer()
+        control.startMatch()
         randomizeAISpeed()
         ballPosition = CGPoint(x: gameWidth/2, y: gameHeight/2)
         ballVelocity = CGVector(dx: Bool.random() ? 3 : -3, dy: CGFloat.random(in: -2...2))
 
-        // Start game timer
-        Timer.scheduledTimer(withTimeInterval: 1/60.0, repeats: true) { timer in
-            if !gameRunning {
-                timer.invalidate()
-                return
-            }
-
+        gameTimer = Timer.scheduledTimer(withTimeInterval: 1/60.0, repeats: true) { _ in
+            guard control.shouldAdvanceSimulation else { return }
             updateGame()
         }
+    }
+
+    private func stopGameTimer() {
+        gameTimer?.invalidate()
+        gameTimer = nil
+    }
+
+    private func returnToAbout() {
+        stopGameTimer()
+        control.resetToInstructions()
+        isUpKeyPressed = false
+        isDownKeyPressed = false
+        onBackToAbout?()
     }
 
     private func updateGame() {
@@ -236,13 +253,9 @@ struct PongGameView: View {
 
         // Check for game over
         if playerScore >= targetScore {
-            gameOver = true
-            gameRunning = false
-            winner = "You Win! 🎉"
+            endGame(winner: "You Win! 🎉")
         } else if aiScore >= targetScore {
-            gameOver = true
-            gameRunning = false
-            winner = "AI Wins! 🤖"
+            endGame(winner: "AI Wins! 🤖")
         }
 
         // AI paddle movement
@@ -280,23 +293,28 @@ struct PongGameView: View {
         ballVelocity = CGVector(dx: Bool.random() ? 3 : -3, dy: CGFloat.random(in: -2...2))
     }
 
+    private func endGame(winner message: String) {
+        control.endMatch()
+        winner = message
+        stopGameTimer()
+    }
+
     private func resetGame() {
-        gameRunning = false
-        gameOver = false
+        stopGameTimer()
+        control.resetToInstructions()
         playerScore = 0
         aiScore = 0
         ballPosition = CGPoint(x: gameWidth/2, y: gameHeight/2)
         playerPaddleY = gameHeight / 2
         aiPaddleY = gameHeight / 2
         winner = ""
-        showInstructions = true
         randomizeAISpeed()
     }
     
     private func setupKeyboardMonitoring() {
         // Monitor key down events
         let keyDownMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            if gameRunning && !gameOver {
+            if control.shouldAdvanceSimulation {
                 switch event.keyCode {
                 case 126: // Up arrow
                     isUpKeyPressed = true
@@ -313,7 +331,7 @@ struct PongGameView: View {
         
         // Monitor key up events
         let keyUpMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyUp) { event in
-            if gameRunning && !gameOver {
+            if control.shouldAdvanceSimulation {
                 switch event.keyCode {
                 case 126: // Up arrow
                     isUpKeyPressed = false

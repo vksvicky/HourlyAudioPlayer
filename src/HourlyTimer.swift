@@ -4,12 +4,15 @@ import AVFoundation
 import AppKit
 import os.log
 
+// AppDelegate is defined in HourlyAudioPlayerApp.swift (same target).
+
 class HourlyTimer: ObservableObject {
     static let shared = HourlyTimer()
 
     private var timer: Timer?
     private let audioFileManager = AudioFileManager.shared
     private let audioManager = AudioManager.shared
+    private let hourScheduleManager = HourScheduleManager.shared
     private var lastPlayedHour: Int = -1
     private var lastKnownTime: Date = Date()
     private let logger = Logger(subsystem: "com.example.HourlyAudioPlayer", category: "HourlyTimer")
@@ -108,6 +111,17 @@ class HourlyTimer: ObservableObject {
         lastPlayedHour = currentHour
         lastKnownTime = now
 
+        runOnMainThread { [weak self] in
+            guard let self else { return }
+            (NSApp.delegate as? AppDelegate)?.closePopover()
+            let launchResult = self.hourScheduleManager.executeScheduledLaunches(for: currentHour)
+            if !launchResult.failedNames.isEmpty {
+                self.logger.warning(
+                    "Hour \(currentHour) launches: \(launchResult.openedCount)/\(launchResult.attemptedCount); failed: \(launchResult.failedNames.joined(separator: ", "))"
+                )
+            }
+        }
+
         if let audioFile = audioFileManager.getAudioFile(for: currentHour) {
             let success = audioManager.playAudio(from: audioFile)
             if success {
@@ -127,6 +141,17 @@ class HourlyTimer: ObservableObject {
     func playCurrentHourAudio() {
         let currentHour = Calendar.current.component(.hour, from: Date())
         logger.info("🎵 Testing audio for current hour: \(currentHour)")
+
+        runOnMainThread { [weak self] in
+            guard let self else { return }
+            (NSApp.delegate as? AppDelegate)?.closePopover()
+            let launchResult = self.hourScheduleManager.executeScheduledLaunches(for: currentHour)
+            if !launchResult.failedNames.isEmpty {
+                self.logger.warning(
+                    "Launch test \(launchResult.openedCount)/\(launchResult.attemptedCount); failed: \(launchResult.failedNames.joined(separator: ", "))"
+                )
+            }
+        }
 
         if let audioFile = audioFileManager.getAudioFile(for: currentHour) {
             logger.info("✅ Found audio file: \(audioFile.name) at \(audioFile.url)")
@@ -344,6 +369,14 @@ class HourlyTimer: ObservableObject {
         Next Audio Time: \(nextHour)
         Timezone: \(TimeZone.current.identifier)
         """
+    }
+
+    private func runOnMainThread(_ block: @escaping () -> Void) {
+        if Thread.isMainThread {
+            block()
+        } else {
+            DispatchQueue.main.async(execute: block)
+        }
     }
 
     #if DEBUG_MODE

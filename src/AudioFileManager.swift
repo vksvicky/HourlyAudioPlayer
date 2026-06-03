@@ -9,12 +9,32 @@ struct AudioFile: Identifiable, Codable {
     let name: String
     let url: URL
     let hour: Int
+    var volume: Float
 
-    init(name: String, url: URL, hour: Int) {
+    enum CodingKeys: String, CodingKey {
+        case id, name, url, hour, volume
+    }
+
+    init(name: String, url: URL, hour: Int, volume: Float = 1.0) {
         self.id = UUID()
         self.name = name
         self.url = url
         self.hour = hour
+        self.volume = AudioFile.clampVolume(volume)
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        url = try container.decode(URL.self, forKey: .url)
+        hour = try container.decode(Int.self, forKey: .hour)
+        let decodedVolume = try container.decodeIfPresent(Float.self, forKey: .volume) ?? 1.0
+        volume = AudioFile.clampVolume(decodedVolume)
+    }
+
+    static func clampVolume(_ value: Float) -> Float {
+        min(max(value, 0), 1)
     }
 }
 
@@ -61,66 +81,31 @@ class AudioFileManager: ObservableObject {
     func selectAudioFile(for hour: Int) {
         logger.info("🎵 Select Audio File for hour \(hour) clicked")
 
-        let panel = NSOpenPanel()
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = false
-        panel.canChooseFiles = true
-        panel.allowedContentTypes = [
-            UTType.audio,
-            UTType.mp3,
-            UTType.wav,
-            UTType.mpeg4Audio,
-            UTType.aiff
-        ]
-
-        // Set the default directory
-        if let defaultDirectory = lastSelectedDirectory {
-            panel.directoryURL = defaultDirectory
-            logger.info("📁 Setting default directory to: \(defaultDirectory.path)")
-        }
-
-        panel.canCreateDirectories = false
-
-        logger.info("🔍 Opening file selection panel for hour \(hour)...")
-        
-        // Find the main window and present as sheet
-        if let mainWindow = findMainWindow() {
-            panel.beginSheetModal(for: mainWindow) { [self] response in
-                self.logger.info("📋 Panel response: \(response.rawValue)")
-                
-                if response == .OK, let url = panel.url {
-                    self.logger.info("✅ File selected: \(url.lastPathComponent)")
-
-                    // Save the selected directory for next time
-                    self.lastSelectedDirectory = url.deletingLastPathComponent()
-                    self.logger.info("💾 Saved directory for next time: \(self.lastSelectedDirectory?.path ?? "nil")")
-
-                    self.importAudioFile(from: url, for: hour)
-                } else {
-                    self.logger.info("❌ File selection cancelled")
-                }
-            }
-        } else {
-            // Fallback to modal if no main window
-            panel.level = .modalPanel
-            panel.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
-            
-            let response = panel.runModal()
-            logger.info("📋 Panel response: \(response.rawValue)")
-
-            if response == .OK, let url = panel.url {
-                logger.info("✅ File selected: \(url.lastPathComponent)")
-
-                // Save the selected directory for next time
-                lastSelectedDirectory = url.deletingLastPathComponent()
-                logger.info("💾 Saved directory for next time: \(self.lastSelectedDirectory?.path ?? "nil")")
-
-                importAudioFile(from: url, for: hour)
-            } else {
-                logger.info("❌ File selection cancelled")
+        let urls = FilePanelPresenter.pickFiles { panel in
+            panel.allowsMultipleSelection = false
+            panel.canChooseDirectories = false
+            panel.canChooseFiles = true
+            panel.allowedContentTypes = [
+                UTType.audio,
+                UTType.mp3,
+                UTType.wav,
+                UTType.mpeg4Audio,
+                UTType.aiff
+            ]
+            if let defaultDirectory = lastSelectedDirectory {
+                panel.directoryURL = defaultDirectory
+                logger.info("📁 Setting default directory to: \(defaultDirectory.path)")
             }
         }
+
+        guard let url = urls.first else {
+            logger.info("❌ File selection cancelled")
+            return
+        }
+
+        logger.info("✅ File selected: \(url.lastPathComponent)")
+        lastSelectedDirectory = url.deletingLastPathComponent()
+        importAudioFile(from: url, for: hour)
     }
 
     private func importAudioFile(from sourceURL: URL, for hour: Int? = nil) {
@@ -216,6 +201,17 @@ class AudioFileManager: ObservableObject {
 
     func getAudioFile(for hour: Int) -> AudioFile? {
         return audioFiles[hour]
+    }
+
+    func setVolume(for hour: Int, volume: Float) {
+        guard var audioFile = audioFiles[hour] else { return }
+        audioFile.volume = AudioFile.clampVolume(volume)
+        audioFiles[hour] = audioFile
+        saveAudioFiles()
+    }
+
+    func volume(for hour: Int) -> Float {
+        audioFiles[hour]?.volume ?? 1.0
     }
     
     // MARK: - Window Management

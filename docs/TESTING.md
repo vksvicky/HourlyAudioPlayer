@@ -33,6 +33,23 @@ This guide covers the comprehensive testing strategy for Hourly Audio Player, in
 ./run_tests.sh
 ```
 
+This runs **`xcodebuild test`** against the `HourlyAudioPlayerTests` target (real XCTest execution). Older grep-based checks in this repo were misleading; always use `./run_tests.sh` or `xcodebuild test` before claiming tests pass.
+
+### Launch schedule limits (unit tests)
+
+`LaunchScheduleSettingsTests` and `HourScheduleManagerTests` cover:
+
+- Default max launches per hour = **1**
+- Clamp range **0–5**
+- Rejecting imports above the limit
+- Trimming when the user lowers the limit
+- Clearing all items when limit = **0**
+- `remainingLaunchSlots` / `canAddLaunchItems`
+
+Manual **Test launches now** is controlled by **`ShowLaunchTestUI`** in `src/Info.plist` (Boolean `true`/`false`; key omitted = off). Use `./run_tests.sh` for automated checks. For local debugging only, set the key to `true`, rebuild, then open **Settings** (⌘,) → click a hour’s **launch icon** (folder+file) → the button is in the sheet footer. Ensure **Max launches/hour** is at least 1.
+
+There is **no XCUITest target yet** — grid layout and the launch editor sheet are not driven by UI automation. Launch *behaviour* is covered by `LaunchScheduleSettingsTests` and `HourScheduleManagerTests`.
+
 #### Run OS Version Tests
 ```bash
 ./run_os_version_tests.sh [version]

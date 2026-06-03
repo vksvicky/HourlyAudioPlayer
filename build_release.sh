@@ -1,72 +1,25 @@
 #!/bin/bash
+# Release build for Hourly Audio Player.
+# Version and build counts come from scripts/version/manage_version.sh (Trellik pattern).
+#
+# Usage: ./build_release.sh
+# Optional: NOTARIZE=1 and .env.signing for signed/notarised DMG.
 
-# Script to build a release version of Hourly Audio Player
-# Usage: ./build_release.sh [version_number]
-# Example: ./build_release.sh 1.0.0
+set -euo pipefail
 
-set -e  # Exit on any error
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/utils/common.sh
+source "${SCRIPT_DIR}/scripts/utils/common.sh"
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-NC='\033[0m' # No Color
-
-# Function to print colored output
-print_status() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-print_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-print_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-print_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
-
-print_header() {
-    echo -e "${PURPLE}[RELEASE]${NC} $1"
-}
-
-# Get version number and optional build number
-VERSION=${1:-"1.0.0"}
-BUILD_NUMBER_INPUT=${2:-""}
 BUILD_DATE=$(date +"%Y-%m-%d %H:%M:%S")
 
-# Resolve build number: use input, else increment existing CFBundleVersion, else fallback to git rev count
-INFO_PLIST="src/Info.plist"
-if [ -z "$BUILD_NUMBER_INPUT" ]; then
-    if [ -f "$INFO_PLIST" ] && /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$INFO_PLIST" >/dev/null 2>&1; then
-        EXISTING_BUILD=$(/usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$INFO_PLIST" 2>/dev/null || echo "0")
-        if [[ "$EXISTING_BUILD" =~ ^[0-9]+$ ]]; then
-            BUILD_NUMBER=$((EXISTING_BUILD + 1))
-        else
-            BUILD_NUMBER=$(git rev-list --count HEAD 2>/dev/null || echo 1)
-        fi
-    else
-        BUILD_NUMBER=$(git rev-list --count HEAD 2>/dev/null || echo 1)
-    fi
-else
-    BUILD_NUMBER=$BUILD_NUMBER_INPUT
-fi
-
-echo "🏗️  Building Hourly Audio Player Release v$VERSION"
-echo "=================================================="
-echo "Build Date: $BUILD_DATE"
-echo ""
-
-# Check if we're in the right directory
-if [ ! -f "HourlyAudioPlayer.xcodeproj/project.pbxproj" ]; then
-    print_error "HourlyAudioPlayer.xcodeproj not found. Please run this script from the project root directory."
+if [[ ! -f "${XCODE_PROJECT}/project.pbxproj" ]]; then
+    log_error "Run this script from the project root (missing ${XCODE_PROJECT})"
     exit 1
 fi
+
+log_info "Building ${APP_NAME} Release"
+log_info "Build date: ${BUILD_DATE}"
 
 # Create release directory
 RELEASE_DIR="releases"
@@ -76,50 +29,67 @@ mkdir -p "$RELEASE_DIR"
 DOCS_DIR="docs"
 mkdir -p "$DOCS_DIR"
 
-# Clean previous builds
-print_status "Cleaning previous builds..."
-xcodebuild clean -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer > /dev/null 2>&1 || true
+log_info "Cleaning previous builds…"
+xcodebuild clean -project "${XCODE_PROJECT}" -scheme "${SCHEME}" >/dev/null 2>&1 || true
 
-# Update Info.plist with provided version and resolved build number
-if [ -f "$INFO_PLIST" ]; then
-    print_status "Updating Info.plist with version $VERSION ($BUILD_NUMBER)..."
-    /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" "$INFO_PLIST" || /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $VERSION" "$INFO_PLIST"
-    /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$INFO_PLIST" || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BUILD_NUMBER" "$INFO_PLIST"
-    # Also update About panel versions if present
-    /usr/libexec/PlistBuddy -c "Set :NSAboutPanelOptions:NSApplicationVersion $VERSION" "$INFO_PLIST" >/dev/null 2>&1 || true
-    /usr/libexec/PlistBuddy -c "Set :NSAboutPanelOptions:NSVersion '$VERSION (Build $BUILD_NUMBER)'" "$INFO_PLIST" >/dev/null 2>&1 || true
+log_info "Building Release (universal binary)…"
+set +e
+xcodebuild -project "${XCODE_PROJECT}" -scheme "${SCHEME}" -configuration Release \
+    ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO build
+BUILD_EXIT_CODE=$?
+set -e
+
+if [[ "$BUILD_EXIT_CODE" -ne 0 ]]; then
+    "${SCRIPT_DIR}/scripts/version/manage_version.sh" failure || true
+    log_error "Release build failed"
+    exit "$BUILD_EXIT_CODE"
 fi
 
-# Build Release version (pass overrides to ensure consistency and universal binary)
-print_status "Building Release version..."
-if xcodebuild -project HourlyAudioPlayer.xcodeproj -scheme HourlyAudioPlayer -configuration Release MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$BUILD_NUMBER" ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO build; then
-    print_success "Release build completed successfully!"
-else
-    print_error "Release build failed!"
-    exit 1
-fi
+log_success "Release build completed"
 
 # Find the built app
 APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "HourlyAudioPlayer.app" -path "*/Release/*" | head -1)
 
 if [ -z "$APP_PATH" ]; then
-    print_error "Could not find the built app. Build may have failed."
+    log_error "Could not find the built app. Build may have failed."
     exit 1
 fi
 
-print_success "Found release app at: $APP_PATH"
+VERSION=$(get_app_version_slug "$APP_PATH")
+MARKETING_VERSION=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "${APP_PATH}/Contents/Info.plist" 2>/dev/null || echo "$VERSION")
+SUCCESS_COUNT=$(/usr/libexec/PlistBuddy -c "Print :BuildSuccessCount" "${APP_PATH}/Contents/Info.plist" 2>/dev/null || echo "unknown")
+FAILURE_COUNT=$(/usr/libexec/PlistBuddy -c "Print :BuildFailureCount" "${APP_PATH}/Contents/Info.plist" 2>/dev/null || echo "unknown")
+
+log_success "Found release app at: ${APP_PATH}"
+log_info "Version: ${MARKETING_VERSION} (slug: ${VERSION})"
+log_info "Success: ${SUCCESS_COUNT}, Failure: ${FAILURE_COUNT}"
 
 # Create release package
-RELEASE_NAME="HourlyAudioPlayer-v$VERSION"
+RELEASE_NAME="HourlyAudioPlayer-v${VERSION}"
 RELEASE_PACKAGE="$RELEASE_DIR/$RELEASE_NAME"
 
-print_status "Creating release package..."
+log_info "Creating release package…"
 
 # Copy app to release directory
 cp -R "$APP_PATH" "$RELEASE_PACKAGE.app"
 
+# Optional: load signing env and sign the .app before packaging
+if [ -f ".env.signing" ]; then
+    # shellcheck disable=SC1091
+    set -a
+    source ".env.signing"
+    set +a
+fi
+
+if [ "${NOTARIZE:-}" = "1" ] || [ -n "${NOTARY_KEYCHAIN_PROFILE:-}" ]; then
+  log_info "Signing release application for notarisation…"
+  # shellcheck disable=SC1091
+  source "scripts/sign_and_notarize.sh"
+  sign_application_bundle "$RELEASE_PACKAGE.app"
+fi
+
 # Create a DMG (Disk Image) for easy distribution
-print_status "Creating DMG for distribution..."
+log_info "Creating DMG for distribution…"
 
 DMG_NAME="$RELEASE_NAME.dmg"
 DMG_PATH="$RELEASE_DIR/$DMG_NAME"
@@ -286,7 +256,7 @@ EOF
 
 # Append auto-generated release notes from git history
 if command -v git >/dev/null 2>&1 && [ -d .git ]; then
-    print_status "Generating changelog from recent git commits..."
+    log_info "Generating changelog from recent git commits…"
     LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
     if [ -n "$LAST_TAG" ]; then
         GIT_RANGE="$LAST_TAG..HEAD"
@@ -306,7 +276,7 @@ if command -v git >/dev/null 2>&1 && [ -d .git ]; then
         echo ""
     } >> "$RELEASE_NOTES"
 else
-    print_warning "Git not available; skipping automatic changelog generation."
+    log_warning "Git not available; skipping automatic changelog generation."
 fi
 
 # Create troubleshooting script in docs folder
@@ -644,14 +614,22 @@ cp "$QUICK_START" "$TEMP_DMG_DIR/"
 cp "$RELEASE_CHECKLIST" "$TEMP_DMG_DIR/"
 
 # Create DMG
-print_status "Creating DMG for distribution..."
+log_info "Creating DMG for distribution…"
 hdiutil create -volname "Hourly Audio Player v$VERSION" -srcfolder "$TEMP_DMG_DIR" -ov -format UDZO "$DMG_PATH"
+
+# Notarise and staple DMG when credentials are configured
+if [ "${NOTARIZE:-}" = "1" ] || [ -n "${NOTARY_KEYCHAIN_PROFILE:-}" ]; then
+  log_info "Notarising DMG (this may take several minutes)…"
+  # shellcheck disable=SC1091
+  source "scripts/sign_and_notarize.sh"
+  notarise_disk_image "$DMG_PATH"
+fi
 
 # Clean up temp directory
 rm -rf "$TEMP_DMG_DIR"
 
 # Create ZIP archive as alternative distribution method
-print_status "Creating ZIP archive..."
+log_info "Creating ZIP archive…"
 ZIP_NAME="$RELEASE_NAME.zip"
 ZIP_PATH="$RELEASE_DIR/$ZIP_NAME"
 cd "$RELEASE_DIR"
@@ -668,14 +646,14 @@ ZIP_SIZE=$(du -h "$ZIP_PATH" | cut -f1)
 
 # Optional: Open release directory in Finder
 if command -v open &> /dev/null; then
-    print_status "Opening release directory in Finder..."
+    log_info "Opening release directory in Finder…"
     open "$RELEASE_DIR"
 fi
 
 # Display final summary with all files
-print_success "🎉 Release build completed successfully!"
+log_success "Release build completed successfully"
 echo ""
-print_header "Release Package Created:"
+log_info "Release package created:"
 echo "  📦 DMG: $DMG_NAME ($DMG_SIZE)"
 echo "  📦 ZIP: $ZIP_NAME ($ZIP_SIZE)"
 echo "  📄 Release Notes: RELEASE_NOTES_v$VERSION.txt"
@@ -683,13 +661,13 @@ echo "  🔧 Troubleshoot Script: troubleshoot.sh"
 echo "  🚀 Quick Start Guide: QUICK_START_GUIDE.txt"
 echo "  📋 Release Checklist: RELEASE_CHECKLIST.txt"
 echo ""
-print_header "Release Location:"
+log_info "Release location:"
 echo "  📁 $RELEASE_DIR/"
 echo ""
-print_header "Documentation Location:"
+log_info "Documentation location:"
 echo "  📁 $DOCS_DIR/"
 echo ""
-print_header "Distribution Files:"
+log_info "Distribution files:"
 echo "  🎵 $DMG_PATH"
 echo "  🎵 $ZIP_PATH"
 echo "  📋 $RELEASE_NOTES"
@@ -697,6 +675,6 @@ echo "  🔧 $TROUBLESHOOT_SCRIPT"
 echo "  🚀 $QUICK_START"
 echo "  📋 $RELEASE_CHECKLIST"
 echo ""
-print_status "You can now distribute the DMG or ZIP file to users."
-print_status "The DMG provides the best user experience for installation."
-print_status "All documentation and troubleshooting tools are included in the packages."
+log_info "You can distribute the DMG or ZIP to users."
+log_info "The DMG provides the best installation experience."
+log_info "Documentation and troubleshooting tools are included in the packages."

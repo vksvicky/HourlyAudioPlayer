@@ -1,64 +1,126 @@
 import SwiftUI
+import AppKit
 import os.log
+
+extension Notification.Name {
+    static let hourlyPlayerDidLaunchExternalItem = Notification.Name("HourlyPlayerDidLaunchExternalItem")
+}
 
 @main
 struct HourlyAudioPlayerApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
+        // Placeholder only — real settings use AppWindowController (one window, no duplicate on ⌘,).
         Settings {
-            ContentView()
+            EmptyView()
+        }
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button("Hourly Audio Player Settings…") {
+                    AppWindowController.shared.openSettings()
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
         }
     }
 }
 
 class AppDelegate: NSObject, NSApplicationDelegate {
-    var statusItem: NSStatusItem?
-    var popover: NSPopover?
+    private var statusItem: NSStatusItem?
     private let logger = Logger(subsystem: "com.example.HourlyAudioPlayer", category: "AppDelegate")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Hide the dock icon
         NSApp.setActivationPolicy(.accessory)
+        installStatusItem()
 
-        // Create status bar item
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleExternalLaunch),
+            name: .hourlyPlayerDidLaunchExternalItem,
+            object: nil
+        )
 
-        if let statusButton = statusItem?.button {
-            // Use the app's custom icon for the menu bar
-            statusButton.image = NSImage(named: "AppIcon")
-            statusButton.image?.size = NSSize(width: 18, height: 18)
-            statusButton.image?.isTemplate = false
-            statusButton.action = #selector(statusBarButtonClicked)
-        }
-
-        // Create popover
-        popover = NSPopover()
-        popover?.contentSize = NSSize(width: 400, height: 500)
-        popover?.behavior = .transient
-        popover?.contentViewController = NSHostingController(rootView: MenuBarView())
-
-        // Start the hourly timer
         HourlyTimer.shared.start()
     }
 
-    @objc func statusBarButtonClicked() {
-        logger.debug("statusBarButtonClicked() invoked")
-        if let popover = popover {
-            logger.debug("Popover exists; isShown=\(popover.isShown, privacy: .public)")
-            if popover.isShown {
-                logger.debug("Closing popover")
-                popover.performClose(nil)
-            } else {
-                logger.debug("Opening popover")
-                if let statusButton = statusItem?.button {
-                    popover.show(relativeTo: statusButton.bounds, of: statusButton, preferredEdge: NSRectEdge.minY)
-                } else {
-                    logger.error("Status bar button missing; cannot show popover")
-                }
+    func closePopover() {
+        // Kept for callers after removing NSPopover; closes auxiliary windows only.
+        AppWindowController.shared.closeAuxiliaryWindows()
+    }
+
+    @objc private func handleExternalLaunch() {
+        // Close settings/about if open; do not recreate the status item (that caused FBSScene noise).
+        AppWindowController.shared.closeAuxiliaryWindows()
+        refreshStatusItemMenuIfNeeded()
+    }
+
+    private func installStatusItem() {
+        if statusItem == nil {
+            statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+            guard let button = statusItem?.button else {
+                logger.error("Failed to create status bar button")
+                return
             }
-        } else {
-            logger.error("Popover reference is nil")
+            button.image = NSImage(named: "AppIcon")
+            button.image?.size = NSSize(width: 18, height: 18)
+            button.image?.isTemplate = false
+            logger.debug("Status item created")
         }
+        statusItem?.menu = makeStatusItemMenu()
+    }
+
+    /// Reattach menu without removing the status item (avoids Control Center scene-invalidated log spam).
+    private func refreshStatusItemMenuIfNeeded() {
+        guard statusItem != nil else {
+            installStatusItem()
+            return
+        }
+        statusItem?.menu = makeStatusItemMenu()
+    }
+
+    private func makeStatusItemMenu() -> NSMenu {
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+
+        let settingsItem = NSMenuItem(
+            title: "Open Settings…",
+            action: #selector(openSettingsWindow),
+            keyEquivalent: ""
+        )
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+
+        let aboutItem = NSMenuItem(
+            title: "About…",
+            action: #selector(openAboutWindow),
+            keyEquivalent: ""
+        )
+        aboutItem.target = self
+        menu.addItem(aboutItem)
+
+        menu.addItem(.separator())
+
+        let quitItem = NSMenuItem(
+            title: "Quit",
+            action: #selector(quitApplication),
+            keyEquivalent: "q"
+        )
+        quitItem.target = self
+        menu.addItem(quitItem)
+
+        return menu
+    }
+
+    @objc private func openSettingsWindow() {
+        AppWindowController.shared.openSettings()
+    }
+
+    @objc private func openAboutWindow() {
+        AppWindowController.shared.openAbout()
+    }
+
+    @objc private func quitApplication() {
+        NSApp.terminate(nil)
     }
 }

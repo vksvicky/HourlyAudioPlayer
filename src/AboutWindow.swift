@@ -1,10 +1,9 @@
 import SwiftUI
 
 struct AboutWindow: View {
-    @Environment(\.dismiss) private var dismiss
+    @StateObject private var aboutViewModel = AboutViewModel()
     @StateObject private var themeManager = ThemeManager.shared
-    @State private var iconClickCount = 0
-    @State private var showPongGame = false
+    @StateObject private var session = AboutSessionState()
     @State private var currentTransition: AnyTransition = .scale.combined(with: .opacity)
 
     private var aboutPanelOptions: [String: Any] {
@@ -12,37 +11,22 @@ struct AboutWindow: View {
     }
 
     var body: some View {
-        if showPongGame {
+        if session.showPongGame {
             PongGameView(onBackToAbout: {
                 withAnimation(.easeInOut(duration: 0.6)) {
-                    showPongGame = false
-                    iconClickCount = 0 // Reset counter when returning
+                    session.returnFromPong()
                 }
             })
             .transition(currentTransition)
         } else {
             VStack(spacing: 14) {
-            // Close button in top-right corner
-            HStack {
-                Spacer()
-                Text("×")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(.red)
-                    .onTapGesture {
-                        dismiss()
-                    }
-                    .help("Close")
-            }
-            .padding(.top, -10)
-            .padding(.trailing, -10)
             // App Icon
             Image(nsImage: NSImage(named: "AppIcon") ?? NSImage())
                 .resizable()
                 .frame(width: 64, height: 64)
                 .shadow(radius: 2)
                 .onTapGesture {
-                    iconClickCount += 1
-                    if iconClickCount >= 6 {
+                    if session.registerIconTap(threshold: 6) {
                         playRandomTransition()
                     }
                 }
@@ -52,11 +36,16 @@ struct AboutWindow: View {
                 .font(.system(size: 28, weight: .bold, design: .default))
                 .foregroundColor(.primary)
 
-            // Version Information
-            Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "N/A") " +
-                 "(Build \(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "N/A"))")
+            Text("Version \(aboutViewModel.currentVersion.isEmpty ? "…" : aboutViewModel.currentVersion)")
                 .font(.system(size: 14, weight: .regular, design: .default))
                 .foregroundColor(.primary)
+
+            HStack(spacing: 16) {
+                Text("✅ \(aboutViewModel.currentSuccessCount.isEmpty ? "…" : aboutViewModel.currentSuccessCount)")
+                Text("❌ \(aboutViewModel.currentFailureCount.isEmpty ? "…" : aboutViewModel.currentFailureCount)")
+            }
+            .font(.system(size: 12, weight: .regular, design: .default))
+            .foregroundColor(.secondary)
 
             // Copyright Information
             Text(Bundle.main.object(forInfoDictionaryKey: "NSHumanReadableCopyright") as? String ?? "Copyright © 2025 CycleRunCode. All rights reserved.")
@@ -86,7 +75,10 @@ struct AboutWindow: View {
             .padding(.top, 8)
             }
             .padding(30)
-            .frame(width: 320, height: 380)
+            .frame(width: 320, height: 400)
+            .onAppear {
+                aboutViewModel.refreshVersionInfo()
+            }
             .background(Color(NSColor.windowBackgroundColor))
         }
     }
@@ -153,7 +145,7 @@ struct AboutWindow: View {
         // Play the transition with a random duration
         let duration = Double.random(in: 0.6...1.2)
         withAnimation(.easeInOut(duration: duration)) {
-            showPongGame = true
+            session.showPongGame = true
         }
     }
 }
