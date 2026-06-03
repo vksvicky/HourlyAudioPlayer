@@ -38,14 +38,23 @@ struct AudioFile: Identifiable, Codable {
     }
 }
 
+enum AudioPreviewOutcome: Equatable {
+    case started
+    case noAudioConfigured
+    case fileMissing
+    case playbackFailed
+}
+
 class AudioFileManager: ObservableObject {
     static let shared = AudioFileManager()
+    static let audioFilesStorageKey = "AudioFiles"
 
     @Published var audioFiles: [Int: AudioFile] = [:]
 
     private let documentsDirectory: URL
     private let audioDirectory: URL
-    private let userDefaults = UserDefaults.standard
+    private let userDefaults: UserDefaults
+    private let previewPlayer: AudioPreviewPlaying
     private let logger = Logger(subsystem: "com.example.HourlyAudioPlayer", category: "AudioFileManager")
 
     private var lastSelectedDirectory: URL? {
@@ -63,12 +72,44 @@ class AudioFileManager: ObservableObject {
         }
     }
 
-    private init() {
+    init(
+        previewPlayer: AudioPreviewPlaying = AudioManager.shared,
+        userDefaults: UserDefaults = .standard
+    ) {
+        self.previewPlayer = previewPlayer
+        self.userDefaults = userDefaults
         documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         audioDirectory = documentsDirectory.appendingPathComponent("HourlyAudioPlayer")
 
         createAudioDirectoryIfNeeded()
         loadAudioFiles()
+    }
+
+    @discardableResult
+    func previewAudio(for hour: Int) -> AudioPreviewOutcome {
+        guard let audioFile = getAudioFile(for: hour) else {
+            return .noAudioConfigured
+        }
+        guard FileManager.default.fileExists(atPath: audioFile.url.path) else {
+            logger.warning("Preview failed — file missing for hour \(hour): \(audioFile.name)")
+            return .fileMissing
+        }
+        if previewPlayer.previewAudio(
+            from: audioFile,
+            forHour: hour,
+            maxDuration: AudioManager.defaultPreviewDuration
+        ) {
+            return .started
+        }
+        return .playbackFailed
+    }
+
+    func stopPreview() {
+        previewPlayer.stopPreviewPlayback()
+    }
+
+    func isPreviewing(hour: Int) -> Bool {
+        previewPlayer.previewingHour == hour
     }
 
     private func createAudioDirectoryIfNeeded() {
@@ -132,6 +173,7 @@ class AudioFileManager: ObservableObject {
             audioFiles[targetHour] = audioFile
 
             saveAudioFiles()
+            AudioWaveformCache.shared.invalidate(url: destinationURL)
 
             logger.info("✅ Successfully imported audio file: \(fileName)")
 
@@ -164,7 +206,11 @@ class AudioFileManager: ObservableObject {
     }
 
     func removeAudioFile(for hour: Int) {
+        if isPreviewing(hour: hour) {
+            stopPreview()
+        }
         if let audioFile = audioFiles[hour] {
+            AudioWaveformCache.shared.invalidate(url: audioFile.url)
             // Remove the file from disk
             try? FileManager.default.removeItem(at: audioFile.url)
 
@@ -178,12 +224,12 @@ class AudioFileManager: ObservableObject {
     private func saveAudioFiles() {
         let encoder = JSONEncoder()
         if let data = try? encoder.encode(audioFiles) {
-            userDefaults.set(data, forKey: "AudioFiles")
+            userDefaults.set(data, forKey: Self.audioFilesStorageKey)
         }
     }
 
     private func loadAudioFiles() {
-        if let data = userDefaults.data(forKey: "AudioFiles") {
+        if let data = userDefaults.data(forKey: Self.audioFilesStorageKey) {
             let decoder = JSONDecoder()
             if let loadedFiles = try? decoder.decode([Int: AudioFile].self, from: data) {
                 // Verify that files still exist on disk
@@ -205,9 +251,13 @@ class AudioFileManager: ObservableObject {
 
     func setVolume(for hour: Int, volume: Float) {
         guard var audioFile = audioFiles[hour] else { return }
-        audioFile.volume = AudioFile.clampVolume(volume)
+        let clamped = AudioFile.clampVolume(volume)
+        audioFile.volume = clamped
         audioFiles[hour] = audioFile
         saveAudioFiles()
+        if previewPlayer.previewingHour == hour {
+            previewPlayer.applyPlaybackVolume(clamped)
+        }
     }
 
     func volume(for hour: Int) -> Float {

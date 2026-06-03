@@ -165,12 +165,14 @@ struct HourSlotView: View {
     @ObservedObject private var themeManager = ThemeManager.shared
     @ObservedObject private var launchSettings = LaunchScheduleSettings.shared
     @ObservedObject private var hourColourStore = HourClockColourStore.shared
+    @ObservedObject private var audioManager = AudioManager.shared
 
     private var hasSpecificAudio: Bool {
         audioFileManager.audioFiles[hour] != nil
     }
 
     @State private var showingLaunchEditor = false
+    @State private var waveformSamples: [Float] = []
 
     private var launchItems: [ScheduledLaunchItem] {
         hourScheduleManager.launchItems(for: hour)
@@ -181,52 +183,38 @@ struct HourSlotView: View {
             Text(String(format: "%02d:00", hour))
                 .font(.headline)
                 .fontWeight(.semibold)
+                .frame(height: HourSlotLayout.titleHeight)
 
-            let displayName = audioFileManager.getAudioDisplayName(for: hour)
-            Text(displayName)
+            Text(audioFileManager.getAudioDisplayName(for: hour))
                 .font(.caption2)
                 .lineLimit(1)
                 .multilineTextAlignment(.center)
                 .foregroundColor(hasSpecificAudio ? .primary : .secondary)
+                .frame(height: HourSlotLayout.fileNameHeight)
 
-            if hasSpecificAudio {
-                VStack(spacing: 2) {
-                    Text("Volume")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                    Slider(
-                        value: Binding(
-                            get: { Double(audioFileManager.volume(for: hour)) },
-                            set: { audioFileManager.setVolume(for: hour, volume: Float($0)) }
-                        ),
-                        in: 0...1
-                    )
-                    .controlSize(.mini)
-                }
-                .frame(maxWidth: .infinity)
-                Button("Remove audio") {
-                    audioFileManager.removeAudioFile(for: hour)
-                }
-                .font(.caption2)
-                .foregroundColor(.red)
-            } else {
-                Button("Add audio") {
-                    audioFileManager.selectAudioFile(for: hour)
-                }
-                .font(.caption2)
-                .foregroundColor(.blue)
-            }
+            waveformBlock
+                .frame(width: 100, height: HourSlotLayout.waveformHeight)
+
+            volumeBlock
+                .frame(height: HourSlotLayout.volumeBlockHeight)
+
+            actionRow
+                .frame(height: HourSlotLayout.actionRowHeight)
 
             if launchSettings.launchesEnabled {
                 Divider()
-
                 launchSection
+                    .frame(height: HourSlotLayout.launchBlockHeight)
             }
         }
         .padding(.horizontal, 6)
         .padding(.vertical, 8)
-        .frame(width: 120, alignment: .top)
-        .fixedSize(horizontal: true, vertical: true)
+        .frame(
+            width: HourSlotLayout.cardWidth,
+            height: launchSettings.launchesEnabled
+                ? HourSlotLayout.cardHeightWithLaunch
+                : HourSlotLayout.cardHeightWithoutLaunch
+        )
         .background(slotBackground)
         .cornerRadius(8)
         .overlay(
@@ -236,6 +224,116 @@ struct HourSlotView: View {
         .sheet(isPresented: $showingLaunchEditor) {
             LaunchScheduleEditorView(hour: hour)
         }
+    }
+
+    @ViewBuilder
+    private var waveformBlock: some View {
+        if hasSpecificAudio {
+            AudioWaveformView(
+                samples: waveformSamples,
+                progress: audioManager.previewingHour == hour ? audioManager.previewPlaybackProgress : 0
+            )
+            .onAppear { loadWaveformSamples() }
+            .onChange(of: audioFileManager.audioFiles[hour]?.url) { _ in
+                loadWaveformSamples()
+            }
+        } else {
+            waveformPlaceholder
+        }
+    }
+
+    private var waveformPlaceholder: some View {
+        HStack(spacing: 1) {
+            ForEach(0..<AudioWaveformGenerator.defaultBucketCount, id: \.self) { _ in
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(Color.secondary.opacity(0.15))
+                    .frame(width: 2, height: 4)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var volumeBlock: some View {
+        if hasSpecificAudio {
+            VStack(spacing: 2) {
+                HStack {
+                    Text("Volume")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Text("\(Int((audioFileManager.volume(for: hour) * 100).rounded()))%")
+                        .font(.caption2)
+                        .monospacedDigit()
+                        .foregroundColor(.secondary)
+                }
+                Slider(
+                    value: Binding(
+                        get: { Double(audioFileManager.volume(for: hour)) },
+                        set: { audioFileManager.setVolume(for: hour, volume: Float($0)) }
+                    ),
+                    in: 0...1
+                )
+                .controlSize(.mini)
+            }
+        } else {
+            Color.clear
+        }
+    }
+
+    private var actionRow: some View {
+        HStack(spacing: 12) {
+            if hasSpecificAudio {
+                slotIconButton(
+                    systemName: audioManager.previewingHour == hour ? HourSlotIcons.stopPreview : HourSlotIcons.preview,
+                    tint: .accentColor,
+                    help: audioManager.previewingHour == hour
+                        ? "Stop preview"
+                        : "Preview this hour’s audio (15 seconds max)"
+                ) {
+                    if audioManager.previewingHour == hour {
+                        audioFileManager.stopPreview()
+                    } else {
+                        _ = audioFileManager.previewAudio(for: hour)
+                    }
+                }
+
+                slotIconButton(
+                    systemName: HourSlotIcons.removeAudio,
+                    tint: .red,
+                    help: "Remove audio for this hour"
+                ) {
+                    audioFileManager.removeAudioFile(for: hour)
+                }
+            } else {
+                Spacer(minLength: 0)
+                slotIconButton(
+                    systemName: HourSlotIcons.addAudio,
+                    tint: .accentColor,
+                    help: "Add audio for this hour"
+                ) {
+                    audioFileManager.selectAudioFile(for: hour)
+                }
+                Spacer(minLength: 0)
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private func slotIconButton(
+        systemName: String,
+        tint: Color,
+        help: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(tint)
+                .frame(width: 22, height: 22)
+        }
+        .buttonStyle(.plain)
+        .help(help)
     }
 
     private var launchSection: some View {
@@ -255,6 +353,16 @@ struct HourSlotView: View {
                 ? "Click to add apps or files for this hour"
                 : "Manage scheduled launches (\(launchBadgeLabel))"
         )
+    }
+
+    private func loadWaveformSamples() {
+        guard let url = audioFileManager.getAudioFile(for: hour)?.url else {
+            waveformSamples = []
+            return
+        }
+        AudioWaveformCache.shared.samples(for: url) { samples in
+            waveformSamples = samples
+        }
     }
 
     private var slotBackground: Color {

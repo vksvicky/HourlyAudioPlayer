@@ -37,6 +37,12 @@ This runs **`xcodebuild test`** against the `HourlyAudioPlayerTests` target (rea
 
 ### Launch schedule limits (unit tests)
 
+`AudioPreviewTests` covers hour-slot audio preview (mock player outcomes, stop/remove behaviour, and WAV playback via `AudioManager`).
+
+`AudioWaveformTests` covers waveform peak generation, normalisation, caching, and empty/missing file handling.
+
+`HourVolumeTests` covers per-hour volume clamping, UserDefaults persistence, live preview volume updates, and hours without custom audio.
+
 `LaunchScheduleSettingsTests` and `HourScheduleManagerTests` cover:
 
 - Default max launches per hour = **1**

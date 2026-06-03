@@ -10,6 +10,26 @@ enum LaunchScheduleIcons {
     static let limitSetting = "plusminus"
 }
 
+/// Fixed hour-card layout and SF Symbols for audio actions (macOS 12+).
+enum HourSlotLayout {
+    static let cardWidth: CGFloat = 120
+    static let cardHeightWithLaunch: CGFloat = 192
+    static let cardHeightWithoutLaunch: CGFloat = 148
+    static let titleHeight: CGFloat = 18
+    static let fileNameHeight: CGFloat = 14
+    static let waveformHeight: CGFloat = 22
+    static let volumeBlockHeight: CGFloat = 34
+    static let actionRowHeight: CGFloat = 26
+    static let launchBlockHeight: CGFloat = 40
+}
+
+enum HourSlotIcons {
+    static let addAudio = "plus.circle.fill"
+    static let preview = "play.fill"
+    static let stopPreview = "stop.fill"
+    static let removeAudio = "trash"
+}
+
 /// Folder + file with + / ± / count badges overlaid on the icon (not beside it).
 struct LaunchItemIconView: View {
     let itemCount: Int
