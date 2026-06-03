@@ -5,6 +5,7 @@ import SwiftUI
 enum AudioWaveformGenerator {
     static let defaultBucketCount = 40
 
+    /// Reads audio in small chunks so decoded waveforms do not load the entire file into RAM at once.
     static func generateSamples(from url: URL, bucketCount: Int = defaultBucketCount) -> [Float] {
         guard bucketCount > 0,
               FileManager.default.fileExists(atPath: url.path),
@@ -14,18 +15,74 @@ enum AudioWaveformGenerator {
             return []
         }
 
-        let frameCapacity = AVAudioFrameCount(file.length)
-        guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: frameCapacity) else {
+        let totalFrames = Int(file.length)
+        let framesPerBucket = max(1, (totalFrames + bucketCount - 1) / bucketCount)
+        let chunkCapacity = AVAudioFrameCount(min(8192, max(framesPerBucket, 1)))
+
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: chunkCapacity) else {
             return []
         }
 
-        do {
-            try file.read(into: buffer)
-        } catch {
-            return []
+        var peaks = [Float](repeating: 0, count: bucketCount)
+        var globalFrame = 0
+
+        while globalFrame < totalFrames {
+            let framesToRead = min(Int(chunkCapacity), totalFrames - globalFrame)
+            buffer.frameLength = 0
+            file.framePosition = AVAudioFramePosition(globalFrame)
+            do {
+                try file.read(into: buffer)
+            } catch {
+                break
+            }
+
+            let chunkLength = Int(buffer.frameLength)
+            guard chunkLength > 0 else { break }
+
+            accumulatePeaks(
+                buffer: buffer,
+                chunkLength: chunkLength,
+                globalFrameStart: globalFrame,
+                framesPerBucket: framesPerBucket,
+                bucketCount: bucketCount,
+                peaks: &peaks
+            )
+
+            globalFrame += chunkLength
+            if chunkLength < framesToRead { break }
         }
 
-        return downsample(buffer: buffer, bucketCount: bucketCount)
+        return normalize(peaks)
+    }
+
+    private static func accumulatePeaks(
+        buffer: AVAudioPCMBuffer,
+        chunkLength: Int,
+        globalFrameStart: Int,
+        framesPerBucket: Int,
+        bucketCount: Int,
+        peaks: inout [Float]
+    ) {
+        if let channel = buffer.floatChannelData?[0] {
+            for offset in 0..<chunkLength {
+                let absoluteFrame = globalFrameStart + offset
+                let bucket = min(bucketCount - 1, absoluteFrame / framesPerBucket)
+                peaks[bucket] = max(peaks[bucket], abs(channel[offset]))
+            }
+        } else if let channel = buffer.int16ChannelData?[0] {
+            for offset in 0..<chunkLength {
+                let absoluteFrame = globalFrameStart + offset
+                let bucket = min(bucketCount - 1, absoluteFrame / framesPerBucket)
+                let sample = abs(Float(channel[offset]) / Float(Int16.max))
+                peaks[bucket] = max(peaks[bucket], sample)
+            }
+        }
+    }
+
+    private static func normalize(_ peaks: [Float]) -> [Float] {
+        let maxPeak = peaks.max() ?? 0
+        guard maxPeak > 0 else { return peaks }
+        return peaks.map { $0 / maxPeak }
     }
 
     static func downsample(buffer: AVAudioPCMBuffer, bucketCount: Int) -> [Float] {
@@ -61,41 +118,94 @@ enum AudioWaveformGenerator {
             return Array(repeating: 0, count: bucketCount)
         }
 
-        let maxPeak = peaks.max() ?? 0
-        guard maxPeak > 0 else {
-            return peaks
-        }
-        return peaks.map { $0 / maxPeak }
+        return normalize(peaks)
     }
 }
 
 /// Caches waveform samples per file URL (invalidated when the file changes on disk).
 final class AudioWaveformCache: ObservableObject {
     static let shared = AudioWaveformCache()
+    static let maximumEntries = 32
 
     private var cache: [String: [Float]] = [:]
+    private var cacheOrder: [String] = []
+    private var epoch = UUID()
+
+    var entryCount: Int { cache.count }
 
     init() {}
     private let queue = DispatchQueue(label: "AudioWaveformCache", qos: .userInitiated)
 
-    func samples(for url: URL, bucketCount: Int = AudioWaveformGenerator.defaultBucketCount, completion: @escaping ([Float]) -> Void) {
+    /// Loads peaks on a background queue; cancelled logically when `removeAll()` bumps the epoch.
+    func samples(for url: URL, bucketCount: Int = AudioWaveformGenerator.defaultBucketCount) async -> [Float] {
         let key = cacheKey(for: url)
         if let cached = cache[key] {
-            completion(cached)
-            return
+            return cached
         }
 
-        queue.async { [weak self] in
-            let generated = AudioWaveformGenerator.generateSamples(from: url, bucketCount: bucketCount)
-            DispatchQueue.main.async {
-                self?.cache[key] = generated
-                completion(generated)
+        let captureEpoch = epoch
+        return await withCheckedContinuation { continuation in
+            queue.async { [weak self] in
+                guard let self else {
+                    DispatchQueue.main.async { continuation.resume(returning: []) }
+                    return
+                }
+                guard self.epoch == captureEpoch else {
+                    DispatchQueue.main.async { continuation.resume(returning: []) }
+                    return
+                }
+
+                let generated = AudioWaveformGenerator.generateSamples(from: url, bucketCount: bucketCount)
+                DispatchQueue.main.async {
+                    guard self.epoch == captureEpoch else {
+                        continuation.resume(returning: [])
+                        return
+                    }
+                    self.store(generated, forKey: key)
+                    continuation.resume(returning: generated)
+                }
+            }
+        }
+    }
+
+    func samples(for url: URL, bucketCount: Int = AudioWaveformGenerator.defaultBucketCount, completion: @escaping ([Float]) -> Void) {
+        Task {
+            let result = await samples(for: url, bucketCount: bucketCount)
+            await MainActor.run {
+                completion(result)
             }
         }
     }
 
     func invalidate(url: URL) {
-        cache.removeValue(forKey: cacheKey(for: url))
+        let key = cacheKey(for: url)
+        cache.removeValue(forKey: key)
+        cacheOrder.removeAll { $0 == key }
+    }
+
+    /// Drops cached waveform peaks and cancels in-flight generation (e.g. when settings closes).
+    func removeAll() {
+        epoch = UUID()
+        cache.removeAll()
+        cacheOrder.removeAll()
+    }
+
+    func insertSamplesForTesting(_ samples: [Float], key: String) {
+        store(samples, forKey: key)
+    }
+
+    func samplesForTesting(key: String) -> [Float]? {
+        cache[key]
+    }
+
+    private func store(_ samples: [Float], forKey key: String) {
+        cache[key] = samples
+        cacheOrder.removeAll { $0 == key }
+        cacheOrder.append(key)
+        while cacheOrder.count > Self.maximumEntries {
+            let oldest = cacheOrder.removeFirst()
+            cache.removeValue(forKey: oldest)
+        }
     }
 
     private func cacheKey(for url: URL) -> String {

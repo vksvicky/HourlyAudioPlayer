@@ -88,7 +88,10 @@ struct LaunchScheduleEditorView: View {
         }
         .frame(width: 420, height: showLaunchTestControls ? 440 : 400)
         .alert("Launch test", isPresented: $showTestResult) {
-            Button("OK", role: .cancel) {}
+            Button("OK") {
+                showTestResult = false
+            }
+            .keyboardShortcut(.defaultAction)
         } message: {
             Text(testResultMessage)
         }
@@ -112,7 +115,6 @@ struct LaunchScheduleEditorView: View {
                 Button("Done") {
                     dismiss()
                 }
-                .keyboardShortcut(.defaultAction)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -122,7 +124,6 @@ struct LaunchScheduleEditorView: View {
                 Button("Done") {
                     dismiss()
                 }
-                .keyboardShortcut(.defaultAction)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 12)
@@ -130,7 +131,10 @@ struct LaunchScheduleEditorView: View {
     }
 
     private func runLaunchTest() {
-        let result = hourScheduleManager.executeScheduledLaunches(for: hour)
+        let result = hourScheduleManager.executeScheduledLaunches(
+            for: hour,
+            notifyToCloseSettings: false
+        )
         testResultMessage = hourScheduleManager.launchTestMessage(for: result, hour: hour)
         showTestResult = true
     }

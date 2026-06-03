@@ -56,6 +56,8 @@ Manual **Test launches now** is controlled by **`ShowLaunchTestUI`** in `src/Inf
 
 There is **no XCUITest target yet** — grid layout and the launch editor sheet are not driven by UI automation. Launch *behaviour* is covered by `LaunchScheduleSettingsTests` and `HourScheduleManagerTests`.
 
+**Planned coverage** for settings-window memory and close crashes is documented in [blog/03-regression-testing-lifecycle-bugs.md](blog/03-regression-testing-lifecycle-bugs.md). Narrative drafts for the incidents live in [blog/](blog/README.md).
+
 #### Run OS Version Tests
 ```bash
 ./run_os_version_tests.sh [version]

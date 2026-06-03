@@ -25,6 +25,8 @@ This folder contains all documentation for the Hourly Audio Player project, orga
 - `TESTING.md` - Testing procedures and test documentation
 - `BUILD_INSTRUCTIONS.md` - Build and deployment instructions
 - `CONTRIBUTING.md` - Contribution guidelines
+- `MEMORY.md` - Resident memory monitoring and settings-window RSS notes
+- `blog/` - **Draft blog posts** (memory investigation, window-close crash, regression test plan)
 
 ### Release Management
 - `RELEASE_CHECKLIST.txt` - Quality assurance checklist for releases

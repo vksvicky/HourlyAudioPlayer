@@ -29,6 +29,7 @@
 		B000000000000000000004 /* LaunchScheduleIcons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000014 /* LaunchScheduleIcons.swift */; };
 		B000000000000000000005 /* HourClockColour.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000015 /* HourClockColour.swift */; };
 		B000000000000000000006 /* AudioWaveform.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000016 /* AudioWaveform.swift */; };
+		B000000000000000000007 /* MemoryFootprint.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000017 /* MemoryFootprint.swift */; };
 		B000000000000000000101 /* PongGameControlStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000111 /* PongGameControlStateTests.swift */; };
 		B000000000000000000102 /* AboutSessionStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000112 /* AboutSessionStateTests.swift */; };
 		B000000000000000000103 /* HourScheduleManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000113 /* HourScheduleManagerTests.swift */; };
@@ -37,6 +38,7 @@
 		B000000000000000000106 /* HourClockColourTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000116 /* HourClockColourTests.swift */; };
 		B000000000000000000107 /* AudioPreviewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000117 /* AudioPreviewTests.swift */; };
 		B000000000000000000108 /* AudioWaveformTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000118 /* AudioWaveformTests.swift */; };
+		B000000000000000000109 /* MemoryFootprintTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B000000000000000000119 /* MemoryFootprintTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +68,7 @@
 		B000000000000000000014 /* LaunchScheduleIcons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScheduleIcons.swift; sourceTree = "<group>"; };
 		B000000000000000000015 /* HourClockColour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourClockColour.swift; sourceTree = "<group>"; };
 		B000000000000000000016 /* AudioWaveform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioWaveform.swift; sourceTree = "<group>"; };
+		B000000000000000000017 /* MemoryFootprint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryFootprint.swift; sourceTree = "<group>"; };
 		B000000000000000000021 /* HourlyAudioPlayerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HourlyAudioPlayerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B000000000000000000111 /* PongGameControlStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PongGameControlStateTests.swift; sourceTree = "<group>"; };
 		B000000000000000000112 /* AboutSessionStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutSessionStateTests.swift; sourceTree = "<group>"; };
@@ -75,6 +78,7 @@
 		B000000000000000000116 /* HourClockColourTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HourClockColourTests.swift; sourceTree = "<group>"; };
 		B000000000000000000117 /* AudioPreviewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPreviewTests.swift; sourceTree = "<group>"; };
 		B000000000000000000118 /* AudioWaveformTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioWaveformTests.swift; sourceTree = "<group>"; };
+		B000000000000000000119 /* MemoryFootprintTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryFootprintTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +151,7 @@
 				B000000000000000000014 /* LaunchScheduleIcons.swift */,
 				B000000000000000000015 /* HourClockColour.swift */,
 				B000000000000000000016 /* AudioWaveform.swift */,
+				B000000000000000000017 /* MemoryFootprint.swift */,
 				A1234567890123456789012F /* Assets.xcassets */,
 				A1234567890123456789072 /* Info.plist */,
 				A1234567890123456789014D /* HourlyAudioPlayer.entitlements */,
@@ -174,6 +179,7 @@
 				B000000000000000000116 /* HourClockColourTests.swift */,
 				B000000000000000000117 /* AudioPreviewTests.swift */,
 				B000000000000000000118 /* AudioWaveformTests.swift */,
+				B000000000000000000119 /* MemoryFootprintTests.swift */,
 			);
 			path = test;
 			sourceTree = "<group>";
@@ -325,6 +331,7 @@
 				B000000000000000000004 /* LaunchScheduleIcons.swift in Sources */,
 				B000000000000000000005 /* HourClockColour.swift in Sources */,
 				B000000000000000000006 /* AudioWaveform.swift in Sources */,
+				B000000000000000000007 /* MemoryFootprint.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -340,6 +347,7 @@
 				B000000000000000000106 /* HourClockColourTests.swift in Sources */,
 				B000000000000000000107 /* AudioPreviewTests.swift in Sources */,
 				B000000000000000000108 /* AudioWaveformTests.swift in Sources */,
+				B000000000000000000109 /* MemoryFootprintTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -223,7 +223,10 @@ class HourScheduleManager: ObservableObject {
     }
 
     @discardableResult
-    func executeScheduledLaunches(for hour: Int) -> ScheduledLaunchRunResult {
+    func executeScheduledLaunches(
+        for hour: Int,
+        notifyToCloseSettings: Bool = true
+    ) -> ScheduledLaunchRunResult {
         let items = launchItems(for: hour).filter(\.isEnabled)
         guard !items.isEmpty else {
             return ScheduledLaunchRunResult(openedCount: 0, attemptedCount: 0, failedNames: [])
@@ -242,7 +245,7 @@ class HourScheduleManager: ObservableObject {
             }
         }
 
-        if openedCount > 0 {
+        if openedCount > 0, notifyToCloseSettings {
             DispatchQueue.main.async {
                 NotificationCenter.default.post(name: .hourlyPlayerDidLaunchExternalItem, object: nil)
             }

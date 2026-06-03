@@ -30,6 +30,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private let logger = Logger(subsystem: "com.example.HourlyAudioPlayer", category: "AppDelegate")
 
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        false
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         installStatusItem()
@@ -42,6 +46,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         )
 
         HourlyTimer.shared.start()
+        MemoryFootprintMonitor.startIfEnabled()
     }
 
     func closePopover() {

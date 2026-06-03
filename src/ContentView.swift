@@ -8,8 +8,6 @@ struct ContentView: View {
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var launchSettings = LaunchScheduleSettings.shared
     @StateObject private var hourColourStore = HourClockColourStore.shared
-    @Environment(\.dismiss) private var dismiss
-
     var body: some View {
         VStack(spacing: 20) {
             Text("Hourly Audio Player")
@@ -108,7 +106,7 @@ struct ContentView: View {
                 #endif
 
                 Button("Done") {
-                    dismiss()
+                    AppWindowController.shared.closeAuxiliaryWindows()
                 }
                 .buttonStyle(.bordered)
                 .keyboardShortcut(.defaultAction)
@@ -173,6 +171,7 @@ struct HourSlotView: View {
 
     @State private var showingLaunchEditor = false
     @State private var waveformSamples: [Float] = []
+    @State private var waveformTaskID = UUID()
 
     private var launchItems: [ScheduledLaunchItem] {
         hourScheduleManager.launchItems(for: hour)
@@ -224,6 +223,18 @@ struct HourSlotView: View {
         .sheet(isPresented: $showingLaunchEditor) {
             LaunchScheduleEditorView(hour: hour)
         }
+        .task(id: waveformLoadKey) {
+            await loadWaveformSamplesIfNeeded()
+        }
+        .onDisappear {
+            waveformSamples = []
+            waveformTaskID = UUID()
+        }
+    }
+
+    private var waveformLoadKey: String {
+        let url = audioFileManager.audioFiles[hour]?.url.absoluteString ?? "none"
+        return "\(hour)-\(url)"
     }
 
     @ViewBuilder
@@ -233,10 +244,6 @@ struct HourSlotView: View {
                 samples: waveformSamples,
                 progress: audioManager.previewingHour == hour ? audioManager.previewPlaybackProgress : 0
             )
-            .onAppear { loadWaveformSamples() }
-            .onChange(of: audioFileManager.audioFiles[hour]?.url) { _ in
-                loadWaveformSamples()
-            }
         } else {
             waveformPlaceholder
         }
@@ -355,14 +362,21 @@ struct HourSlotView: View {
         )
     }
 
-    private func loadWaveformSamples() {
+    @MainActor
+    private func loadWaveformSamplesIfNeeded() async {
+        guard AppWindowController.shared.isSettingsWindowOpen else {
+            waveformSamples = []
+            return
+        }
         guard let url = audioFileManager.getAudioFile(for: hour)?.url else {
             waveformSamples = []
             return
         }
-        AudioWaveformCache.shared.samples(for: url) { samples in
-            waveformSamples = samples
-        }
+
+        let taskID = waveformTaskID
+        let samples = await AudioWaveformCache.shared.samples(for: url)
+        guard taskID == waveformTaskID, AppWindowController.shared.isSettingsWindowOpen else { return }
+        waveformSamples = samples
     }
 
     private var slotBackground: Color {
